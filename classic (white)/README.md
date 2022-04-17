@@ -1,4 +1,4 @@
-Lua script: 
+Skin script: 
 * https://github.com/JiayuanWen/as2_skin_ClassicWhite/blob/main/classic%20(white)/classic%20(white).lua
 
 3D Models:
