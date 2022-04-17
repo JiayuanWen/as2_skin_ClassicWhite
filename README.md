@@ -11,7 +11,7 @@ A custom skin for the rhythm game Audiosurf 2. This skin aim to recreate the whi
 ## Extra feature: Alternative cameras
 This skin has two camera modes: Normal camera, Competitive camera
 
-To switch between the two camera modes, go to (Your Audiosurf 2 directory)\skins\76561198099088813\classic (white), open "classic (white).lua", then set competitiveCamera under Options to either true or false.
+To switch between the two camera modes, go to (Your Audiosurf 2 directory)\skins\76561198099088813\classic (white) or (Your Audiosurf 2 directory)\skins\classic (white) if you didn't install the skin through workshop, open "classic (white).lua", then set competitiveCamera under Options to either true or false.
 
 ## Download
 * If you already own Audiosurf 2 on Steam, you can subscribe to this skin [here](https://steamcommunity.com/sharedfiles/filedetails/?id=1157230034).
