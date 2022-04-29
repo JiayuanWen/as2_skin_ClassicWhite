@@ -1921,7 +1921,7 @@ do --Rails
                 color = {r = 255, g = 255, b = 255},
                 flatten = false,
                 wrapnodeshape = false,
-                texture = "textures/big cliff.png",
+                texture = "textures/rail/big cliff.png",
                 fullfuture = true,
                 stretch = math.ceil(#track * 3 / 63500),
                 calculatenormals = false,
