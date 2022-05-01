@@ -1,6 +1,9 @@
 # Audiosurf 2 Skin - Classic (White)
 A custom skin for the rhythm game Audiosurf 2. This skin aim to recreate the white background look from Audiosurf 1.
-
+<br>
+<br>
+<br>
+<br>
 ### Original:
 <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fapps4win.com%2Fwp-content%2Fuploads%2F2019%2F08%2Faudiosurf-13144-2.jpg&f=1&nofb=1" width="45%"></img>
 <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2Fy_0vG9o-M0M%2Fmaxresdefault.jpg&f=1&nofb=1" width="45%"></img> 
