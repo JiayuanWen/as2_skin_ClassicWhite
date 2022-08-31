@@ -1,5 +1,5 @@
 # Audiosurf 2 Skin - Classic (White)
-A custom skin for the rhythm game Audiosurf 2. This skin aim to recreate the white background look from Audiosurf 1.
+A custom skin for the rhythm game [Audiosurf 2](https://store.steampowered.com/app/235800/Audiosurf_2/). This skin aim to recreate the white background look from [Audiosurf 1](https://store.steampowered.com/app/12900/AudioSurf/).
 <br>
 <br>
 <br>
