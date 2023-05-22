@@ -1041,10 +1041,10 @@ do --Background buildings
                     locations = buildingNodes,
                     rotateWithTrack = false,
                     rotationspeeds = buildingRotatAnimation,
-                    maxShown = 250,
+                    maxShown = 5,
                     maxDistanceShown = 2000,
                     offsets = offsets,
-                    collisionLayer = -4,
+                    collisionLayer = -4, 
                      --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
                     testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
                 }
