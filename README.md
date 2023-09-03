@@ -31,7 +31,8 @@ https://youtu.be/4fxc80fZ9Sc
 <br>
 <br>
 
-## Feature: Alternative cameras
+## Features 
+### Alternative cameras
 This skin has two camera modes: Normal camera, Competitive camera
 
 To switch between the two camera modes, go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or `(Your Audiosurf 2 directory)\skins\classic (white)` if you didn't install the skin through workshop, open `classic (white).lua`, then set competitiveCamera under Options to either true or false.
