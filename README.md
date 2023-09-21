@@ -1,4 +1,5 @@
 # Audiosurf 2 Skin - Classic (White)
+![Thumbnail](https://raw.githubusercontent.com/JiayuanWen/JiayuanWen.github.io.data/main/projects/proj2/thumb.jpg)
 A custom skin for the rhythm game [Audiosurf 2](https://store.steampowered.com/app/235800/Audiosurf_2/). This skin aim to recreate the white background look from [Audiosurf 1](https://store.steampowered.com/app/12900/AudioSurf/).
 <br>
 
@@ -18,18 +19,6 @@ A custom skin for the rhythm game [Audiosurf 2](https://store.steampowered.com/a
 
 ### Video showcase:
 https://youtu.be/4fxc80fZ9Sc
-
-## Comparison
-
-### Original (From Audiosurf 1):
-<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fapps4win.com%2Fwp-content%2Fuploads%2F2019%2F08%2Faudiosurf-13144-2.jpg&f=1&nofb=1" width="45%"></img>
-<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2Fy_0vG9o-M0M%2Fmaxresdefault.jpg&f=1&nofb=1" width="45%"></img> 
-
-### Recreation (This project):
-<img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484151855/D2B0E1EB307A5E45D399CFAF39BE24ED4AA4EAE6/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="45%"></img> 
-<img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484370532/597C448FB1F83C553BDE7242CDBEAD8355DD8DAF/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="45%"></img>
-<br>
-<br>
 
 ## Features 
 ### Alternative cameras
@@ -54,6 +43,18 @@ Go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or 
 You can toggle whether to show road entirely or partial.
 
 Go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or `(Your Audiosurf 2 directory)\skins\classic (white)` if you didn't install the skin through workshop, open `classic (white).lua`, then set showEntireRoad under Extra Graphic Options to either true or false.
+<br>
+<br>
+
+## Comparison
+
+### Original (From Audiosurf 1):
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fapps4win.com%2Fwp-content%2Fuploads%2F2019%2F08%2Faudiosurf-13144-2.jpg&f=1&nofb=1" width="45%"></img>
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2Fy_0vG9o-M0M%2Fmaxresdefault.jpg&f=1&nofb=1" width="45%"></img> 
+
+### Recreation (This project):
+<img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484151855/D2B0E1EB307A5E45D399CFAF39BE24ED4AA4EAE6/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="45%"></img> 
+<img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484370532/597C448FB1F83C553BDE7242CDBEAD8355DD8DAF/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="45%"></img>
 <br>
 <br>
 
