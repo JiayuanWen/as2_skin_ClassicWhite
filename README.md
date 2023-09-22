@@ -28,7 +28,7 @@ To switch between the two camera modes, go to `(Your Audiosurf 2 directory)\skin
 <br>
 
 ### Spectrum/Mono road color
-You can toggle whether the road are of the same color throughout or possess different color depending on the song's intensity.
+You can toggle whether the road be rendered the same color throughout or possess different color at different sections depending on the song's intensity.
 
 Go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or `(Your Audiosurf 2 directory)\skins\classic (white)` if you didn't install the skin through workshop, open `classic (white).lua`, then set oneColorCliff under Options to either true or false.
 <br>
