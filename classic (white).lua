@@ -466,11 +466,11 @@ do -- Gameplay graphics
         }
     end
 
-    SetVideoScreenTransform {
-        pos = {120, -99.44, 0},
-        rot = {0, 0, 0},
-        scale = {10, 6, 3}
-    }
+    --SetVideoScreenTransform {
+    --    pos = {120, -99.44, 0},
+    --    rot = {0, 0, 0},
+    --    scale = {10, 6, 3}
+    --}
 end --End of gameplay graphic section
 
 do --Player model
@@ -1044,7 +1044,7 @@ do --Background buildings
                     maxShown = 5,
                     maxDistanceShown = 2000,
                     offsets = offsets,
-                    collisionLayer = -4, 
+                    collisionLayer = -4,
                      --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
                     testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
                 }
@@ -1179,7 +1179,7 @@ do --Background buildings
                 local buildingRotateAnimation = {}
                 offsets = {}
                 for i = 1, #track do
-                    if i % 1200 == 0 and not track[i].funkyrot and song < 0.83 then
+                    if i % 1200 == 0 and track[i].funkyrot == false and song < 0.83 then
                         buildingNodes3[#buildingNodes3 + 1] = i
                         buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 370, 0}
                         local xOffset = 90 --Distance between building and track along X-axis (left and right)
@@ -1236,7 +1236,7 @@ do --Background buildings
                 local buildingNodes5 = {}
                 offsets = {}
                 for i = 1, #track do
-                    if i % 1350 == 0 and not track[i].funkyrot and song < 0.84 then
+                    if i % 1750 == 0 and not track[i].funkyrot and song < 0.84 then
                         buildingNodes5[#buildingNodes5 + 1] = i
                         local xOffset = 216 --Distance between building and track along X-axis (left and right)
                         if math.random(0, 1) > 0.5 then
@@ -1291,7 +1291,7 @@ do --Background buildings
                 local buildingRotateAnimation = {}
                 offsets = {}
                 for i = 1, #track do
-                    if i % 1210 == 0 and not track[i].funkyrot and song < 0.83 then
+                    if (i % 2310) == 0 and not track[i].funkyrot and song < 0.83 then
                         buildingNodes6[#buildingNodes6 + 1] = i
                         buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 200, 0}
                         local xOffset = 330 --Distance between building and track along X-axis (left and right)
