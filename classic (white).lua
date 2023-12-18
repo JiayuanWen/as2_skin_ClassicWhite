@@ -807,16 +807,19 @@ end --End of ring section
 
 do --Air Bubbles
     if showAirBubbles then
-        bubbleTexture = "textures/scene/DustUltra.png"
 
         if quality < 2 then
             bubbleDensity = 90
+            bubbleTexture = "textures/scene/DustLow.png"
         elseif quality < 3 then
             bubbleDensity = 120
+            bubbleTexture = "textures/scene/DustMed.png"
         elseif quality < 4 then
             bubbleDensity = 160
+            bubbleTexture = "textures/scene/DustHigh.png"
         else
             bubbleDensity = 200
+            bubbleTexture = "textures/scene/DustUltra.png"
         end
 
         local bubbleMesh =
