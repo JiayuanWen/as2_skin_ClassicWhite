@@ -1,13 +1,14 @@
 --Options
 competitiveCamera = false --Set this to true to tweak camera angle for competitive play.
 oneColorCliff = false --If this is set to true, the track's cliff will be the same color from begin to end. If set to false, the track's cliff will be in rainbow color. 
+showEntireRoad = false --If set to true, the entire track is visible. If set to false, the track is loaded section by section during gameplay.
 --End of options
 
 --Extra Graphic Options
-showEntireRoad = false --If set to true, the entire track is visible. If set to false, the track is loaded section by section during gameplay.
 showRing = true --Toggle ring visibility On/Off.
 showBackgroundBuilding = true --Toggle background objects On/Off.
 showSkyWire = true --Toggle wires in the sky On/Off.
+showAirBubbles = true --Toggle air bubbles On/Off.
 --End of graphic options
 
 --Make sure to save before heading back to the game.
@@ -710,8 +711,8 @@ do --Skybox
             },
             texture = "textures/scene/White.png"
         }
-         --
-        --[[
+
+--[[
 function Update(dt, trackLocation, playerStrafe, playerJumpHeight, intensity) --Skywire blinks with the music's intensity 
 	if skywireMat then
 		local greyScale = 255 - (92*intensity)
@@ -722,8 +723,9 @@ function Update(dt, trackLocation, playerStrafe, playerJumpHeight, intensity) --
 			}
 		}
 	end
-end
-]] CreateObject {
+end]]
+
+CreateObject {
             --skywires, the lines in the sky. A railed object is attached to the track and moves along it with the player.
             railoffset = 0,
             floatonwaterwaves = false,
@@ -804,85 +806,94 @@ do --Rings
 end --End of ring section
 
 do --Air Bubbles
-    if quality < 4 then
+    if showAirBubbles then
         bubbleTexture = "textures/scene/DustUltra.png"
-    else
-        bubbleTexture = "textures/scene/DustUltra.png"
-    end
-    local bubbleMesh =
-        BuildMesh {
-        mesh = "models/background/airbubble.obj",
-        barycentricTangents = true,
-        calculateNormals = false,
-        submeshesWhenCombining = false
-    }
-    CreateObject {
-        name = "AirBubbles",
-        visible = false,
-        tracknode = "start",
-        gameobject = {
-            transform = {pos = {0, 0, 0}, scale = {0.7, 0.7, 0.7}},
-            mesh = bubbleMesh,
-            shader = "VertexColorUnlitTintedAlpha2",
-            shadercolors = {
-                --_Color = "highway"
-                _Color = {150, 150, 150}
-            },
-            texture = bubbleTexture,
-            layer = 13,
-        }
-    }
-    if bubbleNodes == nil and bubbleNodesTop == nil then
-        local bubbleNodes = {}
-        local bubbleNodesTop = {}
 
-        offsets = {}
-        offsetsTop = {}
-        for i = 1, #track do
-            if i % 5 == 0 and track[i].funkyrot == false then
-                bubbleNodes[#bubbleNodes + 1] = i
-
-                local xOffset = trackWidth + math.random(10, 100) --Distance between bubble and track along X-axis (left and right)
-                local yOffset = math.random(-50, 50) --Distance between bubble and track along y-axis (topleft and bottom)
-
-                if math.random(0, 1) > 0.4 then
-                    xOffset = xOffset * -1
-                end --Randomize rather the bubble appear left or right of the track
-
-                offsets[#offsets + 1] = {xOffset,yOffset, 0} --Bubble offset on {x,y,z}
-            end
-            if i % 15 == 0 and track[i].funkyrot == false then
-                bubbleNodesTop[#bubbleNodesTop + 1] = i
-
-                local xOffsetTop = trackWidth + math.random(-20, 20) --Distance between bubble and track along X-axis (left and right)
-                local yOffsetTop = trackWidth + math.random(10, 50) --Distance between bubble and track along y-axis (topleft and bottom)
-
-                offsetsTop[#offsetsTop + 1] = {xOffsetTop,yOffsetTop, 0} --Bubble offset on {x,y,z}
-            end
+        if quality < 2 then
+            bubbleDensity = 90
+        elseif quality < 3 then
+            bubbleDensity = 120
+        elseif quality < 4 then
+            bubbleDensity = 160
+        else
+            bubbleDensity = 200
         end
 
-        BatchRenderEveryFrame {
-            prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-            locations = bubbleNodes,
-            rotateWithTrack = true,
-            maxShown = 200,
-            maxDistanceShown = 2000,
-            offsets = offsets,
-            collisionLayer = -7,
-                --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-            testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+        local bubbleMesh =
+            BuildMesh {
+            mesh = "models/background/airbubble.obj",
+            barycentricTangents = true,
+            calculateNormals = false,
+            submeshesWhenCombining = false
         }
-        BatchRenderEveryFrame {
-            prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-            locations = bubbleNodesTop,
-            rotateWithTrack = true,
-            maxShown = 200,
-            maxDistanceShown = 2000,
-            offsets = offsetsTop,
-            collisionLayer = -7,
-                --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-            testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+        CreateObject {
+            name = "AirBubbles",
+            visible = false,
+            tracknode = "start",
+            gameobject = {
+                transform = {pos = {0, 0, 0}, scale = {0.7, 0.7, 0.7}},
+                mesh = bubbleMesh,
+                shader = "VertexColorUnlitTintedAlpha2",
+                shadercolors = {
+                    --_Color = "highway"
+                    _Color = {150, 150, 150}
+                },
+                texture = bubbleTexture,
+                layer = 13,
+            }
         }
+        if bubbleNodes == nil and bubbleNodesTop == nil then
+            local bubbleNodes = {}
+            local bubbleNodesTop = {}
+
+            offsets = {}
+            offsetsTop = {}
+            for i = 1, #track do
+                if i % 5 == 0 and track[i].funkyrot == false then
+                    bubbleNodes[#bubbleNodes + 1] = i
+
+                    local xOffset = trackWidth + math.random(10, 100) --Distance between bubble and track along X-axis (left and right)
+                    local yOffset = math.random(-50, 50) --Distance between bubble and track along y-axis (topleft and bottom)
+
+                    if math.random(0, 1) > 0.4 then
+                        xOffset = xOffset * -1
+                    end --Randomize rather the bubble appear left or right of the track
+
+                    offsets[#offsets + 1] = {xOffset,yOffset, 0} --Bubble offset on {x,y,z}
+                end
+                if i % 15 == 0 and track[i].funkyrot == false then
+                    bubbleNodesTop[#bubbleNodesTop + 1] = i
+
+                    local xOffsetTop = trackWidth + math.random(-20, 20) --Distance between bubble and track along X-axis (left and right)
+                    local yOffsetTop = trackWidth + math.random(10, 50) --Distance between bubble and track along y-axis (topleft and bottom)
+
+                    offsetsTop[#offsetsTop + 1] = {xOffsetTop,yOffsetTop, 0} --Bubble offset on {x,y,z}
+                end
+            end
+
+            BatchRenderEveryFrame {
+                prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
+                locations = bubbleNodes,
+                rotateWithTrack = true,
+                maxShown = bubbleDensity,
+                maxDistanceShown = 2000,
+                offsets = offsets,
+                collisionLayer = -7,
+                    --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+            }
+            BatchRenderEveryFrame {
+                prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
+                locations = bubbleNodesTop,
+                rotateWithTrack = true,
+                maxShown = bubbleDensity,
+                maxDistanceShown = 2000,
+                offsets = offsetsTop,
+                collisionLayer = -7,
+                    --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+            }
+        end
     end
 end --end of air bubbles
 
@@ -2446,7 +2457,7 @@ do --Rails
 				color = {r = 255, g = 255, b = 255},
 				flatten = false,
 				wrapnodeshape = true,
-				texture = "textures/big cliff.png",
+				texture = "textures/rail/big cliff.png",
 				fullfuture = true,
 				stretch = math.ceil(#track * 6 / 63500),
 				calculatenormals = false,
@@ -2527,7 +2538,7 @@ do --Rails
 				color = {r = 255, g = 255, b = 255},
 				flatten = false,
 				wrapnodeshape = true,
-				texture = "textures/big cliff.png",
+				texture = "textures/rail/big cliff.png",
 				fullfuture = true,
 				stretch = math.ceil(#track * 6 / 63500),
 				calculatenormals = false,
@@ -2619,8 +2630,8 @@ do --Rails
             colorMode = "highway",
             color = {r = 255, g = 255, b = 255},
             flatten = true,
-            texture = "textures/scene/White.png",
-            shader = "VertexColorUnlitTinted"
+            texture = "textures/rail/big cliff.png",
+            shader = "VertexColorUnlitTintedAlpha2"
         }
 
         CreateRail {
@@ -2644,8 +2655,9 @@ do --Rails
             colorMode = "highway",
             color = {r = 255, g = 255, b = 255},
             flatten = true,
-            texture = "textures/scene/White.png",
-            shader = "VertexColorUnlitTinted"
+            texture = "textures/rail/big cliff.png",
+            shader = "VertexColorUnlitTintedAlpha2"
         }
+
     end
 end --End of rail creation

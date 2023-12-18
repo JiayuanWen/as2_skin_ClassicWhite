@@ -36,10 +36,9 @@ echo -ne "Copying LICENSE... \r"
 cp ./LICENSE ./classic\ \(white\)/;
 echo -e "Copying LICENSE... Done"
 
-echo -ne "Copying tooltip... \r"
-cp ./tooltip_CN.txt ./classic\ \(white\)/;
-cp ./tooltip_EN.txt ./classic\ \(white\)/;
-echo -e "Copying tooltip... Done"
+echo -ne "Copying tooltip files... \r"
+cp ./tooltip_*.txt ./classic\ \(white\)/;
+echo -e "Copying tooltip files... Done"
 
 echo -ne "Copying thumbnails... \r"
 cp ./uigraphic_big.jpg ./classic\ \(white\)/;
@@ -67,7 +66,7 @@ fi
 if [[ "$format" == "z" ]]; then
 	if type zip > /dev/null; then
 			echo -ne "Write skin to archive... \r"
-			zip classic_white.tar ./classic\ \(white\)
+			zip -r classic_white ./classic\ \(white\)
 			echo -e "Write skin to archive... Done"
 	else
 		echo
