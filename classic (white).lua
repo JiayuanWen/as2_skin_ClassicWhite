@@ -479,7 +479,7 @@ do --Player model
 
     shipMesh =
         BuildMesh {
-        mesh = "models/player/ninjamono.obj",
+        mesh = "models/player/mono.obj",
         barycentricTangents = true,
         calculateNormals = false,
         submeshesWhenCombining = false
@@ -548,7 +548,7 @@ do --Player model
             smooth_tilting_speed = 10,
             smooth_tilting_max_offset = -20,
             pos = {x = 0, y = 0, z = 0},
-            mesh = "models/player/vehicle1a.obj",
+            mesh = "models/player/puzzle.obj",
             shader = "UnlitTintedTexGlow",
             layer = 13,
             reflect = true,
@@ -802,6 +802,89 @@ do --Rings
         end
     end
 end --End of ring section
+
+do --Air Bubbles
+    if quality < 4 then
+        bubbleTexture = "textures/scene/DustUltra.png"
+    else
+        bubbleTexture = "textures/scene/DustUltra.png"
+    end
+    local bubbleMesh =
+        BuildMesh {
+        mesh = "models/background/airbubble.obj",
+        barycentricTangents = true,
+        calculateNormals = false,
+        submeshesWhenCombining = false
+    }
+    CreateObject {
+        name = "AirBubbles",
+        visible = false,
+        tracknode = "start",
+        gameobject = {
+            transform = {pos = {0, 0, 0}, scale = {0.7, 0.7, 0.7}},
+            mesh = bubbleMesh,
+            shader = "VertexColorUnlitTintedAlpha2",
+            shadercolors = {
+                --_Color = "highway"
+                _Color = {150, 150, 150}
+            },
+            texture = bubbleTexture,
+            layer = 13,
+        }
+    }
+    if bubbleNodes == nil and bubbleNodesTop == nil then
+        local bubbleNodes = {}
+        local bubbleNodesTop = {}
+
+        offsets = {}
+        offsetsTop = {}
+        for i = 1, #track do
+            if i % 5 == 0 and track[i].funkyrot == false then
+                bubbleNodes[#bubbleNodes + 1] = i
+
+                local xOffset = trackWidth + math.random(10, 100) --Distance between bubble and track along X-axis (left and right)
+                local yOffset = math.random(-50, 50) --Distance between bubble and track along y-axis (topleft and bottom)
+
+                if math.random(0, 1) > 0.4 then
+                    xOffset = xOffset * -1
+                end --Randomize rather the bubble appear left or right of the track
+
+                offsets[#offsets + 1] = {xOffset,yOffset, 0} --Bubble offset on {x,y,z}
+            end
+            if i % 15 == 0 and track[i].funkyrot == false then
+                bubbleNodesTop[#bubbleNodesTop + 1] = i
+
+                local xOffsetTop = trackWidth + math.random(-20, 20) --Distance between bubble and track along X-axis (left and right)
+                local yOffsetTop = trackWidth + math.random(10, 50) --Distance between bubble and track along y-axis (topleft and bottom)
+
+                offsetsTop[#offsetsTop + 1] = {xOffsetTop,yOffsetTop, 0} --Bubble offset on {x,y,z}
+            end
+        end
+
+        BatchRenderEveryFrame {
+            prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
+            locations = bubbleNodes,
+            rotateWithTrack = true,
+            maxShown = 200,
+            maxDistanceShown = 2000,
+            offsets = offsets,
+            collisionLayer = -7,
+                --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+            testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+        }
+        BatchRenderEveryFrame {
+            prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
+            locations = bubbleNodesTop,
+            rotateWithTrack = true,
+            maxShown = 200,
+            maxDistanceShown = 2000,
+            offsets = offsetsTop,
+            collisionLayer = -7,
+                --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+            testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+        }
+    end
+end --end of air bubbles
 
 do --Waves (Or wakes, as seen in wakeboard mode)
     wakeHeight = 2
@@ -1315,6 +1398,8 @@ do --Background buildings
                     testAndHideIfCollideWithTrack = false 
                 }
             end
+
+
         end --endif quality >= 3
     end --endif showBackgroundBuilding
 end --End of building section
