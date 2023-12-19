@@ -503,8 +503,8 @@ do --Player model
             min_hover_height = 0.15,
             max_hover_height = 0.9,
             use_water_rooster = false,
-            smooth_tilting = false,
-            smooth_tilting_speed = 10,
+            smooth_tilting = true,
+            smooth_tilting_speed = 30,
             smooth_tilting_max_offset = -20,
             pos = {x = 0, y = 0, z = 0.20},
             mesh = shipMesh,
@@ -1058,6 +1058,7 @@ end --End of end object section
 do --Background buildings
     if showBackgroundBuilding then
         if quality >= 3 then
+
             --Disks
             local buildingMesh =
                 BuildMesh {
@@ -1106,12 +1107,12 @@ do --Background buildings
                 local buildingNodes = {}
                 offsets = {}
                 for i = 1, #track do
-                    if i % 220 == 0 then
+                    if i % 170 == 0 then
                         buildingRotatAnimation[#buildingRotatAnimation + 1] = {0, 0, 0}
                         buildingNodes[#buildingNodes + 1] = i
-                        local xOffset = 220 + 1650 * math.random()
+                        local xOffset = 90 + 1650 * math.random()
                         local yOffset = math.random(0, 140)
-                        local zOffset = math.random(-6, 6)
+                        local zOffset = math.random(-1, 0)
                         if xOffset < 300 then
                             xOffset = 670
                         end
@@ -1147,102 +1148,6 @@ do --Background buildings
                 }
             end
 
-            --Pyramid
-            if quality < 4 then
-                pyramidTexture = "textures/backgroundBuildings/pyramid/PyramidShade_High.png"
-            else
-                pyramidTexture = "textures/backgroundBuildings/pyramid/PyramidShade_Ultra.png"
-            end
-            local buildingMesh2 =
-                BuildMesh {
-                mesh = "models/background/pyramid/pyramid.obj",
-                barycentricTangents = true,
-                calculateNormals = false,
-                submeshesWhenCombining = false
-            }
-            local buildingMesh2_1 =
-                BuildMesh {
-                mesh = "models/background/pyramid/pyramidGlow.obj",
-                barycentricTangents = true,
-                calculateNormals = false,
-                submeshesWhenCombining = false
-            }
-            CreateObject {
-                name = "Pyramid",
-                visible = false,
-                gameobject = {
-                    visible = false,
-                    pos = {0, 0, 0},
-                    scale = {130, 130, 130},
-                    transform = {rot = {180, 0, 0}},
-                    mesh = buildingMesh2,
-                    renderqueue = 1998,
-                    shader = "IlluminDiffuse",
-                    shadercolors = {
-                        _Color = {255, 255, 255}
-                    },
-                    texture = pyramidTexture,
-                    layer = 19
-                }
-            }
-            CreateObject {
-                name = "PyramidGlow",
-                visible = false,
-                gameobject = {
-                    visible = false,
-                    pos = {0, 0, 0},
-                    scale = {130, 130, 130},
-                    transform = {rot = {180, 0, 0}},
-                    mesh = buildingMesh2_1,
-                    renderqueue = 1998,
-                    shader = "IlluminDiffuse",
-                    shadercolors = {
-                        _Color = "highway"
-                    },
-                    texture = pyramidTexture,
-                    layer = 19
-                }
-            }
-            if buildingNodes2 == nil then
-                local buildingNodes2 = {}
-                local buildingRot = {}
-                offsets = {}
-                for i = 1, #track do
-                    if
-                        i % 2830 == 0 and track[i].intensity > 0.09 and track[i].intensity < 0.61 and not track[i].funkyrot and song < 0.83 then
-                        buildingNodes2[#buildingNodes2 + 1] = i
-                        buildingRot[#buildingRot + 1] = {180, 0, 0}
-                        local xOffset = 560
-                        offsets[#offsets + 1] = {xOffset, 220, 0}
-                    end
-                end
-
-                BatchRenderEveryFrame {
-                    prefabName = "Pyramid", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                    locations = buildingNodes2,
-                    rotateWithTrack = false,
-                    rotations = buildingRot,
-                    maxShown = 3,
-                    maxDistanceShown = 2000,
-                    offsets = offsets,
-                    collisionLayer = -2,
-                     --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
-                }
-                BatchRenderEveryFrame {
-                    prefabName = "PyramidGlow", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                    locations = buildingNodes2,
-                    rotateWithTrack = false,
-                    rotations = buildingRot,
-                    maxShown = 3,
-                    maxDistanceShown = 2000,
-                    offsets = offsets,
-                    collisionLayer = -2,
-                     --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
-                }
-            end
-
             --That flying one headed thingy I don't know what to call it
             if quality < 4 then
                 clingTexture = "textures/backgroundBuildings/flydart/ClingderShader_High.png"
@@ -1261,7 +1166,7 @@ do --Background buildings
                 visible = false,
                 tracknode = "start",
                 gameobject = {
-                    transform = {pos = {0, 0, 0}, scale = {3, 3, 3}},
+                    transform = {pos = {0, 0, 0}, scale = {1.5, 1.5, 1.5}},
                     mesh = buildingMesh4,
                     shader = "IlluminDiffuse",
                     texture = clingTexture,
@@ -1279,7 +1184,7 @@ do --Background buildings
                     if i % 1200 == 0 and track[i].funkyrot == false and song < 0.83 then
                         buildingNodes3[#buildingNodes3 + 1] = i
                         buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 370, 0}
-                        local xOffset = 90 --Distance between building and track along X-axis (left and right)
+                        local xOffset = 80 --Distance between building and track along X-axis (left and right)
                         if math.random(0, 1) > 0.4 then
                             xOffset = xOffset * -1
                         end --Randomize rather the building appear left or right of the track
@@ -1319,7 +1224,7 @@ do --Background buildings
                 tracknode = "start",
                 visible = false,
                 gameobject = {
-                    transform = {pos = {0, 0, 0}, scale = {35, 35, 35}},
+                    transform = {pos = {0, 0, 0}, scale = {105, 105, 105}},
                     mesh = buildingMesh5,
                     shader = "IlluminDiffuse",
                     texture = clingTexture,
@@ -1335,11 +1240,11 @@ do --Background buildings
                 for i = 1, #track do
                     if i % 1750 == 0 and not track[i].funkyrot and song < 0.84 then
                         buildingNodes5[#buildingNodes5 + 1] = i
-                        local xOffset = 216 --Distance between building and track along X-axis (left and right)
+                        local xOffset = 356 --Distance between building and track along X-axis (left and right)
                         if math.random(0, 1) > 0.5 then
                             xOffset = xOffset * -1
                         end --Randomize rather the building appear left or right of the track
-                        offsets[#offsets + 1] = {xOffset, 6, 0} --Building offset on {x,y,z}
+                        offsets[#offsets + 1] = {xOffset, 50, 0} --Building offset on {x,y,z}
                     end
                 end
 
