@@ -1,10 +1,12 @@
-# Audiosurf 2 Skin - Classic (White) 
-![Thumbnail](https://raw.githubusercontent.com/JiayuanWen/JiayuanWen.github.io.data/main/projects/proj2/thumb.jpg)
+<h1 align="center"> Audiosurf 2 Skin - Classic (White) </h1>
+
+<img align="center" src="https://raw.githubusercontent.com/JiayuanWen/JiayuanWen.github.io.data/main/projects/proj2/thumb.jpg"/>
+
 A custom skin for the rhythm game [Audiosurf 2](https://store.steampowered.com/app/235800/Audiosurf_2/). This skin aim to recreate the white background look from [Audiosurf 1](https://store.steampowered.com/app/12900/AudioSurf/).
-<br>
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/JiayuanWen/as2_skin_ClassicWhite?style=flat-square&labelColor=747474&color=8900ff)
 ![GitHub tag (with filter)](https://img.shields.io/github/v/tag/JiayuanWen/as2_skin_ClassicWhite?label=version&style=flat-square&labelColor=747474&color=8900ff)
+<br>
 
 ## Screenshots
 <img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484140337/051629EB295DBB8B7FBBB5FC57DE9C00E58D9D5A/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="30%"></img> 
