@@ -58,8 +58,8 @@ Go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or 
 <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2Fy_0vG9o-M0M%2Fmaxresdefault.jpg&f=1&nofb=1" width="45%"></img> 
 
 ### Recreation (This project):
-<img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484151855/D2B0E1EB307A5E45D399CFAF39BE24ED4AA4EAE6/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="45%"></img> 
 <img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484370532/597C448FB1F83C553BDE7242CDBEAD8355DD8DAF/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="45%"></img>
+<img src="https://steamuserimages-a.akamaihd.net/ugc/1858301496484151855/D2B0E1EB307A5E45D399CFAF39BE24ED4AA4EAE6/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=#000000&letterbox=false" width="45%"></img> 
 <br>
 <br>
 
