@@ -26,25 +26,25 @@ A custom skin for the rhythm game [Audiosurf 2](https://store.steampowered.com/a
 https://youtu.be/4fxc80fZ9Sc
 
 ## Features 
-### Alternative cameras
+* ### Alternative cameras
 This skin has two camera modes: Normal camera and Competitive camera. The Normal camera is the intended camera for the skin, recreating the camera movement of the original. Competitive camera raise the camera for better visibility, aimed at making competitive play easier.
 
 To switch between the two camera modes, go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or `(Your Audiosurf 2 directory)\skins\classic (white)` if you didn't install the skin through workshop, open `classic (white).lua`, then set competitiveCamera under Options to either true or false.
 <br>
 
-### Spectrum/Mono road color
+* ### Spectrum/Mono road color
 You can toggle whether the road be rendered the same color throughout or possess different color at different sections depending on the song's intensity.
 
 Go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or `(Your Audiosurf 2 directory)\skins\classic (white)` if you didn't install the skin through workshop, open `classic (white).lua`, then set oneColorCliff under Options to either true or false.
 <br>
 
-### Graphical elements toggle
+* ### Graphical elements toggle
 You can toggle visibility of rings, background buildings, and sky wire. 
 
 Go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or `(Your Audiosurf 2 directory)\skins\classic (white)` if you didn't install the skin through workshop, open `classic (white).lua`, then set the elements under Extra Graphic Options to either true or false.
 <br>
 
-### Road length toggle
+* ### Road length toggle
 You can toggle whether to show road entirely or partial.
 
 Go to `(Your Audiosurf 2 directory)\skins\76561198099088813\classic (white)` or `(Your Audiosurf 2 directory)\skins\classic (white)` if you didn't install the skin through workshop, open `classic (white).lua`, then set showEntireRoad under Extra Graphic Options to either true or false.
