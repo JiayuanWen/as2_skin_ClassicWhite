@@ -86,7 +86,7 @@ Option names:
 <br>
 
 ## License
-Creative assets, including textures, sounds, and 3D models, are licensed under **CC BY-NC-SA 4.0**.
+Creative assets, including textures, sounds, and 3D models, are licensed under **CC BY 4.0**.
 
 Lua script is licensed under **GNU GPLv3**.
 
