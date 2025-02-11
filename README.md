@@ -25,6 +25,9 @@ A custom skin for the rhythm game [Audiosurf 2](https://store.steampowered.com/a
 ### Video showcase:
 https://youtu.be/4fxc80fZ9Sc
 
+<br>
+<br>
+
 ## Download & Install
 
 ### Steam Workshop
@@ -36,7 +39,8 @@ If you own Audiosurf 2 from other sources or Steam Workshop doesn't work for you
   * On Linux & Steam Deck: `~/.steam/steam/steamapps/common/Audiosurf 2/skins`
   * MacOS: `~/Library/Application Support/Steam/steamapps/common/Audiosurf 2/skins`
 
-    <small>Note: Your path might differ if you configured Steam to store your games somewhere else.</small>
+    <sup>Note: Your path might differ if you configured Steam to store your games somewhere else.</sup>
+<br>
 <br>
 
 ## Configurations
@@ -47,7 +51,7 @@ To tweak the skin, find and open the skin's lua file:
 * On Linux: `~/.steam/steam/steamapps/common/Audiosurf 2/skins/76561198099088813/classic (white)/classic (white).lua`
 * On MacOS: `~/Library/Application Support/Steam/steamapps/common/Audiosurf 2/skins/76561198099088813/classic (white)/classic (white).lua`
 
-    <small>Note: Your path might differ if you configured Steam to store your games somewhere else.</small>
+    <sup>Note: Your path might differ if you configured Steam to store your games somewhere else.</sup>
 <br>
 
 At the top of the file you'll see the following options:
@@ -78,6 +82,7 @@ Option names:
 * `showBackgroundBuilding` for background objects 
 * `showSkyWire` for wires in the sky
 * `showAirBubbles` for grey bubbles floating around the track
+<br>
 <br>
 
 ## License
