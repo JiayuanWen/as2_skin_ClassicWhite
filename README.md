@@ -94,7 +94,8 @@ See LICENSE for details.
 
 ## Credits
 * Code, model, and texture: **[Jiayuan Wen](https://jiayuanwen.github.io)**
+* Player ship model: **[Paladin Studios](https://paladinstudios.com/)**
 * Concept art: **[Girgan Delic](https://www.gorandelic.com/)**
 * Shader documentation & bug fix: **[DeathByNukes](https://steamcommunity.com/id/DeathByNukes)**
-* Audiosurf series created by: **[Dylan Fitterer](https://twitter.com/dylanfitterer)**
+* Audiosurf series: **[Dylan Fitterer](https://twitter.com/dylanfitterer)**
 
