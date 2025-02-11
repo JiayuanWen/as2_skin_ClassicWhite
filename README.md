@@ -90,7 +90,7 @@ Creative assets, including textures, sounds, and 3D models, are licensed under *
 
 Lua script is licensed under **GNU GPLv3**.
 
-See LICENSE for details.
+See [LICENSE](https://github.com/JiayuanWen/as2_skin_ClassicWhite/blob/main/LICENSE) for details.
 
 ## Credits
 * Code, model, and texture: **[Jiayuan Wen](https://jiayuanwen.github.io)**
