@@ -1,3 +1,20 @@
+--[[
+CLassic (White)
+
+Coded, modeled, and textured by:
+* Jiayuan "Weldon" Wen (Website: https://jiayuanwen.github.io, GitHub: https://github.com/JiayuanWen)
+
+I take no credit for the overall style, they go to the following parties:
+* Dylan Fitterer (Twitter: https://twitter.com/dylanfitterer)
+* Girgan Delic (Website: https://www.gorandelic.com/)
+
+Shader information & bug fixes
+* DeathByNukes (Socials: https://steamcommunity.com/id/DeathByNukes, Email: dbn@deathbynukes.com)
+
+License: GNU GPLv3, see LICENSE file for details.
+
+]]
+
 --Options
 competitiveCamera = false --Set this to true to tweak camera angle for competitive play.
 oneColorCliff = false --If this is set to true, the track's cliff will be the same color from begin to end. If set to false, the track's cliff will be in rainbow color. 
@@ -8,13 +25,19 @@ showEntireRoad = false --If set to true, the entire track is visible. If set to 
 showRing = true --Toggle ring visibility On/Off.
 showBackgroundBuilding = true --Toggle background objects On/Off.
 showSkyWire = true --Toggle wires in the sky On/Off.
-showAirBubbles = true --Toggle air bubbles On/Off.
+showAirBubbles = true --Toggle grey bubbles around the track On/Off.
 --End of graphic options
 
---Make sure to save before heading back to the game.
+--Make sure to save the file before heading back to the game.
 
 
---------------------------------------------------------------------------------------------------------------------------Skin source code------------------------------------------------------------------------------------------------------------------
+---------------------------------------Skin source code--------------------------------------
+
+--------------------------------------------------------------------------------
+
+-- fif shortcut
+
+--------------------------------------------------------------------------------
 do --Lua fif shortcut
     function fif(test, if_true, if_false)
         if test then
@@ -25,7 +48,13 @@ do --Lua fif shortcut
     end
 end --End of fif setup
 
-do --Graphic quality variables
+
+--------------------------------------------------------------------------------
+
+-- Graphic quality variable
+
+--------------------------------------------------------------------------------
+do --Graphic quality variable
     hifi = GetQualityLevel() > 2
     function ifhifi(if_true, if_false)
         if hifi then
@@ -35,8 +64,14 @@ do --Graphic quality variables
         end
     end
     quality = GetQualityLevel4()
-end --End of graphic quality variables section
+end --End of graphic quality variable
 
+
+--------------------------------------------------------------------------------
+
+-- Common variables
+
+--------------------------------------------------------------------------------
 do --Frequent used variables setup
     wakeboard = PlayerCanJump()
     skinvars = GetSkinProperties()
@@ -45,84 +80,93 @@ do --Frequent used variables setup
     fullsteep = wakeboard or skinvars.prefersteep or (not ispuzzle)
     track = GetTrack() --get the track data from the game engine
     song = GetSongCompletionPercentage()
-
-    do --Rail rendering fix
-        --source: https://as2-doc.deathbynukes.com/shaders.html
-
-        ------------------------------------------------------------------------------------------------
-        -- START of rail fix for fast mods.
-        -- (Put this somewhere between "track = GetTrack()" and your first use of CreateRail.)
-        -- (By DeathByNukes, for anyone to use.)
-        ------------------------------------------------------------------------------------------------
-        local min_node_interval, max_node_interval = math.huge, -math.huge
-        do
-            local last_seconds = track[1].seconds
-            for i = 2, #track do
-                local seconds = track[i].seconds
-                local interval = seconds - last_seconds
-                if interval < min_node_interval then
-                    min_node_interval = interval
-                end
-                if interval > max_node_interval then
-                    max_node_interval = interval
-                end
-                last_seconds = seconds
-            end
-        end
-    --[[
-	AS2 ignores fullfuture=true if the rail would have over 63500 vertices. (Which is a good idea. Even if it didn't, this function would be good practice.)
-	This function generates a value for CreateRail{stretch} which causes fullfuture to always work.
-	crossSectionShape_count should be the number of points in crossSectionShape. (e.g. crossSectionShape={{0,0},{1,1}} has 2 points.)
-	stretch=X tells it to only create a vertex every X nodes. Effectively, we degrade the rail's quality in response to the song's length.
-	It may be useful to multiply the result by some GetQualityLevel()-dependent number. Especially if you're using more than one fullfuture rail.
-	To Dylan: It'd be nice if there was a way to have the quality increase for sections of the track close to the player.
-	]]
-        function fullfutureStretch(crossSectionShape_count)
-            return math.ceil(#track * crossSectionShape_count / 63500)
-        end
-
-        local auto_stretch
-        do
-            local required_interval = 0.007 -- ninja is 0.0077, ultimate true ninja is 0.0033
-            if min_node_interval < required_interval then
-                -- Find a stretch value that causes the spacing between vertices to represent a time of at least required_interval.
-                -- todo: There is probably a mathematical formula to calculate this properly in one step.
-                auto_stretch = 1
-                local effective_interval
-                repeat
-                    auto_stretch = auto_stretch + 1
-                    effective_interval = auto_stretch * min_node_interval
-                until effective_interval >= required_interval
-            end
-        end
-
-        -- Hook the CreateRail function and automatically stretch all rails that use the default stretch setting.
-        local original_CreateRail = CreateRail
-        function CreateRail(t)
-            if t.stretch == nil then
-                if not t.fullfuture then
-                    t.stretch = auto_stretch
-                else
-                    local ff_stretch = fullfutureStretch(#t.crossSectionShape)
-                    if ff_stretch > 1 then
-                        -- In this situation fullfuture would actually be ignored by AS2.
-                        t.fullfuture = false
-                        t.stretch = auto_stretch
-                    end
-                end
-            end
-            return original_CreateRail(t)
-        end
-        ------------------------------------------------------------------------------------------------
-        -- END of rail fix for fast mods.
-        ------------------------------------------------------------------------------------------------
-    end --end of rail rendering fix
 	
 end --End of frequent used variables section
 
-do --Skin general settings setup
+
+-----------------------------------------------------------------------------
+
+-- Rail rendering fix for fast game modes
+
+-----------------------------------------------------------------------------
+do --Rail rendering fix
+    --source: https://as2-doc.deathbynukes.com/shaders.html
+
+    -- START of rail fix for fast modes.
+    -- (Put this somewhere between "track = GetTrack()" and your first use of CreateRail.)
+    -- (By DeathByNukes, for anyone to use.)
+    local min_node_interval, max_node_interval = math.huge, -math.huge
+    do
+        local last_seconds = track[1].seconds
+        for i = 2, #track do
+            local seconds = track[i].seconds
+            local interval = seconds - last_seconds
+            if interval < min_node_interval then
+                min_node_interval = interval
+            end
+            if interval > max_node_interval then
+                max_node_interval = interval
+            end
+            last_seconds = seconds
+        end
+    end
+    --[[
+        AS2 ignores fullfuture=true if the rail would have over 63500 vertices. (Which is a good idea. Even if it didn't, this function would be good practice.)
+        This function generates a value for CreateRail{stretch} which causes fullfuture to always work.
+        crossSectionShape_count should be the number of points in crossSectionShape. (e.g. crossSectionShape={{0,0},{1,1}} has 2 points.)
+        stretch=X tells it to only create a vertex every X nodes. Effectively, we degrade the rail's quality in response to the song's length.
+        It may be useful to multiply the result by some GetQualityLevel()-dependent number. Especially if you're using more than one fullfuture rail.
+        To Dylan: It'd be nice if there was a way to have the quality increase for sections of the track close to the player.
+    ]]
+    function fullfutureStretch(crossSectionShape_count)
+        return math.ceil(#track * crossSectionShape_count / 63500)
+    end
+
+    local auto_stretch
+    do
+        local required_interval = 0.007 -- ninja is 0.0077, ultimate true ninja is 0.0033
+        if min_node_interval < required_interval then
+            -- Find a stretch value that causes the spacing between vertices to represent a time of at least required_interval.
+            -- todo: There is probably a mathematical formula to calculate this properly in one step.
+            auto_stretch = 1
+            local effective_interval
+            repeat
+                auto_stretch = auto_stretch + 1
+                effective_interval = auto_stretch * min_node_interval
+            until effective_interval >= required_interval
+        end
+    end
+
+    -- Hook the CreateRail function and automatically stretch all rails that use the default stretch setting.
+    local original_CreateRail = CreateRail
+    function CreateRail(t)
+        if t.stretch == nil then
+            if not t.fullfuture then
+                t.stretch = auto_stretch
+            else
+                local ff_stretch = fullfutureStretch(#t.crossSectionShape)
+                if ff_stretch > 1 then
+                    -- In this situation fullfuture would actually be ignored by AS2.
+                    t.fullfuture = false
+                    t.stretch = auto_stretch
+                end
+            end
+        end
+        return original_CreateRail(t)
+    end
+
+end --end of rail rendering fix
+
+
+--------------------------------------------------------------------------------
+
+-- Skin scene settings
+
+--------------------------------------------------------------------------------
+do --Skin scene settings setup
     quality = GetQualityLevel4()
 
+    -- Define debris amount and texture quality base on graphic quality
     if quality < 3 then
         debrisTexture = "textures/scene/FireworkMed.png"
         airdebrisCount = 400
@@ -130,7 +174,7 @@ do --Skin general settings setup
         blurBool = 0
     elseif quality < 4 then
         debrisTexture = "textures/scene/FireworkHigh.png"
-        airdebrisCount = 450
+        airdebrisCount = 400
         airdebrisDensity = 50
         blurBool = 0
     else
@@ -140,12 +184,14 @@ do --Skin general settings setup
         blurBool = 1.3
     end
 
+    -- Disable intro camera movement for 'low' quality
     if quality < 2 then
         introCameraBool = false
     else
         introCameraBool = true
     end
 
+    -- Scene settings
     SetScene {
         glowpasses = 0,
         glowspread = 0,
@@ -161,25 +207,52 @@ do --Skin general settings setup
         airdebris_count = airdebrisCount,
         airdebris_density = airdebrisDensity,
         airdebris_texture = debrisTexture,
-        airdebris_particlesize = 3.9,
         airdebris_shader = "VertexColorUnlitTintedAlpha2",
-        airdebris_flashsizescaler = 0.9,
+        airdebris_particlesize = 1.3,
+        airdebris_flashsizescaler = 1.5,
         airdebris_layer = 13,
         useblackgrid = true,
         minimap_colormode = "black",
         twistmode = {curvescaler = 1, steepscaler = fif(fullsteep, 1, .65)}
     }
-end --End of skin setting section
+end --End of skin scene settings
 
-do --Post-processing effect(s)
+
+--------------------------------------------------------------------------------
+
+-- UI settings
+
+--------------------------------------------------------------------------------
+do --UI settings
+
+    -- YouTube video appearance settings (deprecated due to different monitor size)
+    --SetVideoScreenTransform {
+    --    pos = {120, -99.44, 0},
+    --    rot = {0, 0, 0},
+    --    scale = {10, 6, 3}
+    --}
+end --End of UI settings
+
+--------------------------------------------------------------------------------
+
+-- Post processing effects
+
+--------------------------------------------------------------------------------
+do --Post-processing effects
     if quality >= 4 then
         AddPostEffect {
             depth = "background",
             material = radialBlurEffect
         }
     end
-end --End of Post-processing effect section
+end --End of Post-processing effects
 
+
+--------------------------------------------------------------------------------
+
+-- Sound effects
+
+--------------------------------------------------------------------------------
 do --Sound effects
     if not ispuzzle then
         LoadSounds {
@@ -189,9 +262,17 @@ do --Sound effects
             matchsmall = "sounds/matchmedium.wav"
         }
     end
-end --End of sound section
+end --End of sound effects
 
-do -- Block behavior
+
+--------------------------------------------------------------------------------
+
+-- Block settings
+
+--------------------------------------------------------------------------------
+do -- Block settings
+
+    -- Define # of visible blocks base on graphic setting
     if quality < 2 then
         blockCount = 35
     elseif quality < 3 then
@@ -202,6 +283,7 @@ do -- Block behavior
         blockCount = 100
     end
 
+    -- Block appearance settings
     if not wakeboard then
         SetBlocks {
             maxvisiblecount = blockCount,
@@ -301,155 +383,8 @@ do -- Block behavior
             }
         }
     end
-end --End of mono mode block behavior
 
-do -- Gameplay graphics
-    if ispuzzle then
-        SetBlocks {
-            maxvisiblecount = 35,
-            colorblocks = {
-                mesh = "models/blocks/colorblock.obj",
-                shader = "IlluminDiffuse",
-                texture = "textures/blocks/Color block.jpg",
-                height = 0,
-                float_on_water = false,
-                scale = {1, 1, 1}
-            }
-        }
-    end
-
-    if quality < 2 then
-        hitTexture = "textures/gameplay/hit2Low.png"
-    elseif quality < 3 then
-        hitTexture = "textures/gameplay/hit2Med.png"
-    elseif quality < 4 then
-        hitTexture = "textures/gameplay/hit2High.png"
-    else
-        hitTexture = "textures/gameplay/hit2Ultra.png"
-    end
-
-    SetBlockFlashes {
-        texture = hitTexture
-    }
-
-    if quality < 2 then
-        SetBlockFlashes {
-            sizescaler = 0,
-            sizescaler_missed = 0
-        }
-    elseif quality >= 2 then
-        SetBlockFlashes {
-            sizescaler = 0.6,
-            sizescaler_missed = 0.4
-        }
-    end
-
-    if quality < 2 then
-        SetPuzzleGraphics {
-            usesublayerclone = false,
-            puzzlematchmaterial = {
-                shader = "Unlit/Transparent",
-                texture = "textures/gameplay/tileMatchingBarsinvert_Low.png",
-                shadercolors = "highway",
-                aniso = 9,
-                layer = 14
-            },
-            puzzleflyupmaterial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/flyup_Low.png",
-                shadercolors = "highway",
-                layer = 14
-            },
-            puzzlematerial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/tilesSquareinvert_Low.png",
-                texturewrap = "clamp",
-                aniso = 9,
-                usemipmaps = "false",
-                shadercolors = {0, 0, 0},
-                layer = 14
-            }
-        }
-    elseif quality < 3 then
-        SetPuzzleGraphics {
-            usesublayerclone = false,
-            puzzlematchmaterial = {
-                shader = "Unlit/Transparent",
-                texture = "textures/gameplay/tileMatchingBarsinvert_Med.png",
-                shadercolors = "highway",
-                aniso = 9,
-                layer = 14
-            },
-            puzzleflyupmaterial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/flyup_Med.png",
-                shadercolors = "highway",
-                layer = 14
-            },
-            puzzlematerial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/tilesSquareinvert_Med.png",
-                texturewrap = "clamp",
-                aniso = 9,
-                usemipmaps = "false",
-                shadercolors = {0, 0, 0},
-                layer = 14
-            }
-        }
-    elseif quality < 4 then
-        SetPuzzleGraphics {
-            usesublayerclone = false,
-            puzzlematchmaterial = {
-                shader = "Unlit/Transparent",
-                texture = "textures/gameplay/tileMatchingBarsinvert_High.png",
-                shadercolors = "highway",
-                aniso = 9,
-                layer = 14
-            },
-            puzzleflyupmaterial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/flyup_High.png",
-                shadercolors = "highway",
-                layer = 14
-            },
-            puzzlematerial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/tilesSquareinvert_High.png",
-                texturewrap = "clamp",
-                aniso = 9,
-                usemipmaps = "false",
-                shadercolors = {0, 0, 0},
-                layer = 14
-            }
-        }
-    else
-        SetPuzzleGraphics {
-            usesublayerclone = false,
-            puzzlematchmaterial = {
-                shader = "Unlit/Transparent",
-                texture = "textures/gameplay/tileMatchingBarsinvert_Ultra.png",
-                shadercolors = "highway",
-                aniso = 9,
-                layer = 14
-            },
-            puzzleflyupmaterial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/flyup_Ultra.png",
-                shadercolors = "highway",
-                layer = 14
-            },
-            puzzlematerial = {
-                shader = "VertexColorUnlitTintedAlpha2",
-                texture = "textures/gameplay/tilesSquareinvert_Ultra.png",
-                texturewrap = "clamp",
-                aniso = 9,
-                usemipmaps = "false",
-                shadercolors = {0, 0, 0},
-                layer = 14
-            }
-        }
-    end
-
+    -- Block colors for puzzle modes
     if skinvars.colorcount < 5 then
         SetBlockColors {
             {r = 0, g = 176, b = 255},
@@ -467,38 +402,140 @@ do -- Gameplay graphics
         }
     end
 
-    --SetVideoScreenTransform {
-    --    pos = {120, -99.44, 0},
-    --    rot = {0, 0, 0},
-    --    scale = {10, 6, 3}
-    --}
-end --End of gameplay graphic section
+    -- Specific block appearance setting for puzzle modes
+    if ispuzzle then
+        SetBlocks {
+            maxvisiblecount = 35,
+            colorblocks = {
+                mesh = "models/blocks/colorblock.obj",
+                shader = "IlluminDiffuse",
+                texture = "textures/blocks/Color block.jpg",
+                height = 0,
+                float_on_water = false,
+                scale = {1, 1, 1}
+            }
+        }
+    end
 
-do --Player model
-    monoTexture = "textures/player/Mono.png"
-    monoColor = "textures/player/MonoColor.png"
+end --End of block settings
 
-    shipMesh =
-        BuildMesh {
-        mesh = "models/player/mono.obj",
-        barycentricTangents = true,
-        calculateNormals = false,
-        submeshesWhenCombining = false
-    }
 
-    shipMaterial =
-        BuildMaterial {
-        renderqueue = 2000,
-        shader = "UnlitTintedTexGlow",
-        shadersettings = {_GlowScaler = 9, _Brightness = 0},
-        shadercolors = {
-            _Color = {128.3, 128.3, 128.3},
-            _GlowColor = {colorsource = "highway", scaletype = "intensity", minscaler = 0.155, maxscaler = 0.155}
-        },
-        textures = {_Glow = monoColor, _MainTex = monoTexture}
-    }
+--------------------------------------------------------------------------------
 
+-- Gameplay graphics
+
+--------------------------------------------------------------------------------
+do -- Gameplay graphics
+
+    -- Block hit effect settings
+    do
+        -- Define hit effect texture quality base on graphic setting
+        if quality < 2 then
+            hitTexture = "textures/gameplay/hit2Low.png"
+        elseif quality < 3 then
+            hitTexture = "textures/gameplay/hit2Med.png"
+        elseif quality < 4 then
+            hitTexture = "textures/gameplay/hit2High.png"
+        else
+            hitTexture = "textures/gameplay/hit2Ultra.png"
+        end
+
+        -- Disable hit effect for 'low' graphic setting
+        if quality < 2 then
+            hitScaler = 0
+            missScaler = 0
+
+        else
+            hitScaler = 0.6
+            missScaler = 0.4
+        end
+
+        SetBlockFlashes {
+            texture = hitTexture,
+            sizescaler = hitScaler,
+            sizescaler_missed = missScaler
+        }
+    end
+
+    -- Grid settings
+    -- (the puzzle grids under the player ship)
+    do
+        
+        -- Define texture quality base on graphic setting
+        local tileTexLevel
+        if quality < 2 then
+            tileTexLevel = "Low"
+        elseif quality < 3 then
+            tileTexLevel = "Med"
+        elseif quality < 4 then
+            tileTexLevel = "High"
+        else
+            tileTexLevel = "Ultra"
+        end
+        local tileMatchTex = "textures/gameplay/tileMatchingBarsinvert_" .. tileTexLevel .. ".png"
+        local tileFlyupTex = "textures/gameplay/flyup_" .. tileTexLevel .. ".png"
+        local tileInvertTex = "textures/gameplay/tilesSquareinvert_" .. tileTexLevel .. ".png"
+
+        -- Grid graphic setting
+        SetPuzzleGraphics {
+            usesublayerclone = false,
+            puzzlematchmaterial = {
+                shader = "Unlit/Transparent",
+                texture = tileMatchTex,
+                shadercolors = "highway",
+                aniso = 9,
+                layer = 14
+            },
+            puzzleflyupmaterial = {
+                shader = "VertexColorUnlitTintedAlpha2",
+                texture = tileFlyupTex,
+                shadercolors = "highway",
+                layer = 14
+            },
+            puzzlematerial = {
+                shader = "VertexColorUnlitTintedAlpha2",
+                texture = tileInvertTex,
+                texturewrap = "clamp",
+                aniso = 9,
+                usemipmaps = "false",
+                shadercolors = {0, 0, 0},
+                layer = 14
+            }
+        }
+    end
+
+end --End of gameplay graphics
+
+
+--------------------------------------------------------------------------------
+
+-- Player ship
+
+--------------------------------------------------------------------------------
+do --Player ship
+
+    -- Player ship for mono modes
     if not ispuzzle then
+        shipMesh =
+            BuildMesh {
+            mesh = "models/player/mono.obj",
+            barycentricTangents = true,
+            calculateNormals = false,
+            submeshesWhenCombining = false
+        }
+
+        shipMaterial =
+            BuildMaterial {
+            renderqueue = 2000,
+            shader = "UnlitTintedTexGlow",
+            shadersettings = {_GlowScaler = 9, _Brightness = 0},
+            shadercolors = {
+                _Color = {128.3, 128.3, 128.3},
+                _GlowColor = {colorsource = "highway", scaletype = "intensity", minscaler = 0.155, maxscaler = 0.155}
+            },
+            textures = {_Glow = "textures/player/vehicleM_glow.png", _MainTex = "textures/player/vehicleM.png"}
+        }
+
         ship = {
             min_hover_height = 0.15,
             max_hover_height = 0.9,
@@ -508,10 +545,10 @@ do --Player model
             smooth_tilting_max_offset = -20,
             pos = {x = 0, y = 0, z = 0.20},
             mesh = shipMesh,
+            material = shipMaterial,
             shadowreceiver = true,
             layer = 13,
             reflect = true,
-            material = shipMaterial,
             scale = {x = 1, y = 1, z = 1},
             thrusters = {
                 crossSectionShape = {
@@ -540,7 +577,27 @@ do --Player model
         }
     end
 
+    -- Player ship for puzzle modes
     if ispuzzle then
+        shipMesh =
+            BuildMesh {
+            mesh = "models/player/puzzle.obj",
+            barycentricTangents = true,
+            calculateNormals = false,
+            submeshesWhenCombining = false
+        }
+        shipMaterial =
+            BuildMaterial {
+            renderqueue = 2000,
+            shader = "UnlitTintedTexGlow",
+            shadersettings = {_GlowScaler = 9, _Brightness = 0},
+            shadercolors = {
+                _Color = {128.3, 128.3, 128.3},
+                _GlowColor = {colorsource = "highway", scaletype = "intensity", minscaler = 0.155, maxscaler = 0.155}
+            },
+            textures = {_Glow = "textures/player/vehicleP_glow.png", _MainTex = "textures/player/vehicleP.png"}
+        }
+
         ship = {
             min_hover_height = 0.23,
             max_hover_height = 0.8,
@@ -549,17 +606,10 @@ do --Player model
             smooth_tilting_speed = 10,
             smooth_tilting_max_offset = -20,
             pos = {x = 0, y = 0, z = 0},
-            mesh = "models/player/puzzle.obj",
-            shader = "UnlitTintedTexGlow",
+            mesh = shipMesh,
+            material=shipMaterial,
             layer = 13,
             reflect = true,
-            renderqueue = 2000,
-            shadersettings = {_GlowScaler = 9, _Brightness = 0},
-            shadercolors = {
-                _Color = {128.3, 128.3, 128.3},
-                _GlowColor = {colorsource = "highway", scaletype = "intensity", minscaler = 0.155, maxscaler = 0.155}
-            },
-            textures = {_Glow = "textures/player/vehicle1a_ao_glow.png", _MainTex = "textures/player/vehicle1a_ao.png"},
             scale = {x = 1, y = 1, z = 1},
             thrusters = {
                 crossSectionShape = {
@@ -587,6 +637,7 @@ do --Player model
         }
     end
 
+    -- Surfer for wakeboard mode
     if wakeboard and not ispuzzle then
         SetPlayer {
             cameramode = "first_jumpthird",
@@ -685,13 +736,21 @@ do --Player model
             }
         end
     end
-end --End of player model behavior section
+end --End of player ship
 
+
+--------------------------------------------------------------------------------
+
+-- Skybox
+
+--------------------------------------------------------------------------------
 do --Skybox
+    -- Skybox texture
     SetSkybox {
         skysphere = "textures/scene/White.png"
     }
 
+    -- Skywire layer adjust base on graphic setting
     if quality < 2 then
         skywireLayer = 13 -- In Low setting, the background (layer 18) is disabled, so move the skywire to the main layer (13) to remain visible
     else
@@ -712,36 +771,43 @@ do --Skybox
             texture = "textures/scene/White.png"
         }
 
---[[
-function Update(dt, trackLocation, playerStrafe, playerJumpHeight, intensity) --Skywire blinks with the music's intensity 
-	if skywireMat then
-		local greyScale = 255 - (92*intensity)
-		UpdateShaderSettings{
-			material = skywireMat,
-			shadercolors={
-				_Color={r=greyScale,g=greyScale,b=greyScale}
-			}
-		}
-	end
-end]]
+        --Skywire blinks with the music's intensity 
+        --[[
+        function Update(dt, trackLocation, playerStrafe, playerJumpHeight, intensity) 
+            if skywireMat then
+                local greyScale = 255 - (92*intensity)
+                UpdateShaderSettings{
+                    material = skywireMat,
+                    shadercolors={
+                        _Color={r=greyScale,g=greyScale,b=greyScale}
+                    }
+                }
+            end
+        end]]
 
-CreateObject {
-            --skywires, the lines in the sky. A railed object is attached to the track and moves along it with the player.
-            railoffset = 0,
-            floatonwaterwaves = false,
-            gameobject = {
-                name = "scriptSkyWires",
-                pos = {x = 0, y = 0, z = 0},
-                mesh = "models/sky/skywires.obj",
-                material = skywireMat,
-                layer = skywireLayer,
-                scale = {x = 1, y = 1, z = 1},
-                lookat = "end"
-            }
+        CreateObject {
+                --skywires, the lines in the sky. A railed object is attached to the track and moves along it with the player.
+                railoffset = 0,
+                floatonwaterwaves = false,
+                gameobject = {
+                    name = "scriptSkyWires",
+                    pos = {x = 0, y = 0, z = 0},
+                    mesh = "models/sky/skywires.obj",
+                    material = skywireMat,
+                    layer = skywireLayer,
+                    scale = {x = 1, y = 1, z = 1},
+                    lookat = "end"
+                }
         }
     end --endif showSkyWire
-end --End of skybox section
+end --End of skybox
 
+
+--------------------------------------------------------------------------------
+
+-- Track colors
+
+--------------------------------------------------------------------------------
 do --Track colors
     SetTrackColors {
         --enter any number of colors here. The track will use the first ones on less intense sections and interpolate all the way to the last one on the most intense sections of the track
@@ -751,25 +817,41 @@ do --Track colors
         {r = 255, g = 255, b = 0},
         {r = 252, g = 0, b = 0}
     }
-end --End of track color section
+end --End of track colors
 
+
+--------------------------------------------------------------------------------
+
+-- Track rings
+
+--------------------------------------------------------------------------------
 do --Rings
-    if quality < 2 then
-        ringTexture = "textures/ring/Classic420p.png"
-    elseif quality < 3 then
-        ringTexture = "textures/ring/Classic720p.png"
-    elseif quality < 4 then
-        ringTexture = "textures/ring/Classic1080p.png"
-    else
-        ringTexture = "textures/ring/Classic2160p.png"
+    local ringTexture
+
+    -- Ring texture quality base on graphic setting
+    local resolution
+    do
+        if quality < 2 then
+            resolution = 420
+        elseif quality < 3 then
+            resolution = 720
+        elseif quality < 4 then
+            resolution = 1080
+        else
+            resolution = 2160
+        end
+
+        ringTexture = "textures/ring/Classic" .. resolution .. "p.png"
     end
 
+    -- Increase ring size so it doesn't clip competitve camera
     if competitiveCamera then
         ringSizeMultiplier = 2.5
     else
         ringSizeMultiplier = 2
     end
 
+    -- Ring settings for non wakeboard (mono & puzzle) modes
     if not wakeboard then
         if showRing then
             SetRings {
@@ -787,6 +869,7 @@ do --Rings
         end
     end
 
+    -- Ring settings for wakeboard mode
     if wakeboard then
         if showRing then
             SetRings {
@@ -805,108 +888,143 @@ do --Rings
     end
 end --End of ring section
 
+
+--------------------------------------------------------------------------------
+
+-- Air bubbles
+
+--------------------------------------------------------------------------------
 do --Air Bubbles
     if showAirBubbles then
+        local bubbleTexture
 
-        if quality < 2 then
-            bubbleDensity = 90
-            bubbleTexture = "textures/scene/DustLow.png"
-        elseif quality < 3 then
-            bubbleDensity = 120
-            bubbleTexture = "textures/scene/DustMed.png"
-        elseif quality < 4 then
-            bubbleDensity = 160
-            bubbleTexture = "textures/scene/DustHigh.png"
-        else
-            bubbleDensity = 200
-            bubbleTexture = "textures/scene/DustUltra.png"
-        end
-
-        local bubbleMesh =
-            BuildMesh {
-            mesh = "models/background/airbubble.obj",
-            barycentricTangents = true,
-            calculateNormals = false,
-            submeshesWhenCombining = false
-        }
-        CreateObject {
-            name = "AirBubbles",
-            visible = false,
-            tracknode = "start",
-            gameobject = {
-                transform = {pos = {0, 0, 0}, scale = {0.7, 0.7, 0.7}},
-                mesh = bubbleMesh,
-                shader = "VertexColorUnlitTintedAlpha2",
-                shadercolors = {
-                    --_Color = "highway"
-                    _Color = {150, 150, 150}
-                },
-                texture = bubbleTexture,
-                layer = 13,
-            }
-        }
-        if bubbleNodes == nil and bubbleNodesTop == nil then
-            local bubbleNodes = {}
-            local bubbleNodesTop = {}
-
-            offsets = {}
-            offsetsTop = {}
-            for i = 1, #track do
-                if i % 5 == 0 and track[i].funkyrot == false then
-                    bubbleNodes[#bubbleNodes + 1] = i
-
-                    local xOffset = trackWidth + math.random(10, 100) --Distance between bubble and track along X-axis (left and right)
-                    local yOffset = math.random(-50, 50) --Distance between bubble and track along y-axis (topleft and bottom)
-
-                    if math.random(0, 1) > 0.4 then
-                        xOffset = xOffset * -1
-                    end --Randomize rather the bubble appear left or right of the track
-
-                    offsets[#offsets + 1] = {xOffset,yOffset, 0} --Bubble offset on {x,y,z}
-                end
-                if i % 15 == 0 and track[i].funkyrot == false then
-                    bubbleNodesTop[#bubbleNodesTop + 1] = i
-
-                    local xOffsetTop = trackWidth + math.random(-20, 20) --Distance between bubble and track along X-axis (left and right)
-                    local yOffsetTop = trackWidth + math.random(10, 50) --Distance between bubble and track along y-axis (topleft and bottom)
-
-                    offsetsTop[#offsetsTop + 1] = {xOffsetTop,yOffsetTop, 0} --Bubble offset on {x,y,z}
-                end
+        -- Adjust air bubble texture quality base on graphic setting
+        local bubbleDensity
+        local bubbleTextureSuffix
+        do
+            if quality < 2 then
+                bubbleDensity = 30
+                bubbleTextureSuffix = "Low"
+            elseif quality < 3 then
+                bubbleDensity = 30
+                bubbleTextureSuffix = "Med"
+            elseif quality < 4 then
+                bubbleDensity = 40
+                bubbleTextureSuffix = "High"
+            else
+                bubbleDensity = 50
+                bubbleTextureSuffix = "Ultra"
             end
 
-            BatchRenderEveryFrame {
-                prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                locations = bubbleNodes,
-                rotateWithTrack = true,
-                maxShown = bubbleDensity,
-                maxDistanceShown = 2000,
-                offsets = offsets,
-                collisionLayer = -7,
-                    --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+            bubbleTexture = "textures/scene/Dust" .. bubbleTextureSuffix .. ".png"
+        end
+
+        -- Air bubble model
+        do
+            local bubbleMesh =
+                BuildMesh {
+                mesh = "models/background/airbubble.obj",
+                barycentricTangents = true,
+                calculateNormals = false,
+                submeshesWhenCombining = false
             }
-            BatchRenderEveryFrame {
-                prefabName = "AirBubbles", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                locations = bubbleNodesTop,
-                rotateWithTrack = true,
-                maxShown = bubbleDensity,
-                maxDistanceShown = 2000,
-                offsets = offsetsTop,
-                collisionLayer = -7,
-                    --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+
+            CreateObject {
+                name = "AirBubbles",
+                visible = false,
+                tracknode = "start",
+                gameobject = {
+                    transform = {pos = {0, 0, 0}, scale = {0.55, 0.55, 0.55}},
+                    mesh = bubbleMesh,
+                    shader = "VertexColorUnlitTintedAlpha2",
+                    shadercolors = {
+                        --_Color = "highway"
+                        _Color = {150, 150, 150}
+                    },
+                    texture = bubbleTexture,
+                    layer = 13,
+                }
             }
+        end
+
+        -- Air bubble scattering
+        do 
+            -- Bubble placements
+            if bubbleNodes == nil and bubbleNodesTop == nil then
+                local bubbleNodes = {}
+                local bubbleNodesTop = {}
+
+                offsets = {}
+                offsetsTop = {}
+                for i = 1, #track do
+                    -- This portion scatters bubbles BESIDE the track
+                    if i % 4 == 0 and track[i].funkyrot == false then
+                        bubbleNodes[#bubbleNodes + 1] = i
+
+                        local xOffset = trackWidth + math.random(10, 100) -- Add track width so it doesn't appear on or near the track 
+                        local yOffset = math.random(-50, 50) 
+
+                        --Randomize rather the bubble appear left or right of the track
+                        if math.random(0, 1) > 0.4 then
+                            xOffset = xOffset * -1
+                        end 
+
+                        offsets[#offsets + 1] = {xOffset,yOffset, 0} 
+                    end
+
+                    -- This portion scatters bubbles ON TOP of the track
+                    if i % 15 == 0 and track[i].funkyrot == false then
+                        bubbleNodesTop[#bubbleNodesTop + 1] = i
+
+                        local xOffsetTop = trackWidth + math.random(-20, 20) 
+                        local yOffsetTop = trackWidth + math.random(10, 50) 
+
+                        offsetsTop[#offsetsTop + 1] = {xOffsetTop,yOffsetTop, 0} 
+                    end
+                end
+
+                --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
+                BatchRenderEveryFrame {
+                    prefabName = "AirBubbles", 
+                    locations = bubbleNodes, -- Render bubbles beisdes the track
+                    rotateWithTrack = true,
+                    maxShown = bubbleDensity,
+                    maxDistanceShown = 800,
+                    offsets = offsets,
+                    collisionLayer = -7, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                    testAndHideIfCollideWithTrack = false 
+                }
+                BatchRenderEveryFrame {
+                    prefabName = "AirBubbles", 
+                    locations = bubbleNodesTop, -- Render bubbles on top of the track
+                    rotateWithTrack = true,
+                    maxShown = bubbleDensity,
+                    maxDistanceShown = 800,
+                    offsets = offsetsTop,
+                    collisionLayer = -7,
+                        --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                    testAndHideIfCollideWithTrack = false 
+                }
+            end
         end
     end
 end --end of air bubbles
 
-do --Waves (Or wakes, as seen in wakeboard mode)
+
+--------------------------------------------------------------------------------
+
+-- Waves (wakeboard mode only)
+
+--------------------------------------------------------------------------------
+do --Waves
     wakeHeight = 2
+
     if wakeboard then
         wakeHeight = 2.5
     else
         wakeHeight = 0
     end
+
     SetWake {
         --setup the spray coming from the two pulling "boats"
         height = wakeHeight,
@@ -918,7 +1036,358 @@ do --Waves (Or wakes, as seen in wakeboard mode)
     }
 end --End of waves section
 
-do --End of track object (Also known as endcookie)
+
+--------------------------------------------------------------------------------
+
+-- Background objects 
+
+--------------------------------------------------------------------------------
+do --Background objects
+    if showBackgroundBuilding then
+        if quality >= 3 then -- Only show objects on 'high' graphic setting 
+
+            --Disks
+            do
+                --Disk model
+                do
+                    local buildingMesh =
+                        BuildMesh {
+                        mesh = "models/background/disks/disk.obj",
+                        barycentricTangents = true,
+                        calculateNormals = false,
+                        submeshesWhenCombining = false
+                    }
+                    CreateObject {
+                        name = "Disks",
+                        tracknode = "start",
+                        gameobject = {
+                            mesh = buildingMesh,
+                            shader = "VertexColorUnlitTintedAlpha2",
+                            shadercolors = {
+                                _Color = "highway"
+                            },
+                            transform = {scale = {scaletype = "intensity", min = {20, 90, 20}, max = {90, 90, 90}}},
+                            texture = "textures/rail/cliff side.png",
+                            layer = 19
+                        }
+                    }
+                end
+
+                --Disk poll model
+                do
+                    local buildingMesh_1 =
+                        BuildMesh {
+                        mesh = "models/background/disks/disksupport.obj",
+                        barycentricTangents = true,
+                        calculateNormals = false,
+                        submeshesWhenCombining = false
+                    }
+                    CreateObject {
+                        name = "DisksPole",
+                        tracknode = "start",
+                        gameobject = {
+                            mesh = buildingMesh_1,
+                            shader = "VertexColorUnlitTintedAlpha2",
+                            shadercolors = {
+                                _Color = "highway"
+                            },
+                            transform = {scale = {45, 90, 45}},
+                            texture = "textures/rail/cliff side.png",
+                            layer = 19
+                        }
+                    }
+                end
+
+                --Model placement & render
+                if buildingNodes == nil then
+                    local buildingRotatAnimation = {}
+                    local buildingNodes = {}
+                    offsets = {}
+
+                    for i = 1, #track do
+                        if i % 80 == 0 then
+                            buildingNodes[#buildingNodes + 1] = i
+                            buildingRotatAnimation[#buildingRotatAnimation + 1] = {0, 0, 0}
+
+                            --Offset from origin
+                            local xOffset = math.random(55, 80)
+                            local yOffset = math.random(0, 1)
+                            local zOffset = math.random(-1, 0)
+                            if xOffset < 300 then
+                                xOffset = 670
+                            end
+
+                            --Randomize rather the building appear left or right of the track
+                            if math.random() > 0.4 then
+                                xOffset = xOffset * -1
+                            end
+
+                            --Building offset on {x,y,z}
+                            offsets[#offsets + 1] = {xOffset, yOffset, zOffset}
+                        end
+                    end
+
+                    --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
+                    BatchRenderEveryFrame {
+                        prefabName = "Disks", 
+                        locations = buildingNodes,
+                        rotateWithTrack = false,
+                        rotationspeeds = buildingRotatAnimation,
+                        maxShown = 6,
+                        maxDistanceShown = 2000,
+                        offsets = offsets,
+                        collisionLayer = -4, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                        testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+                    }
+
+                    --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
+                    BatchRenderEveryFrame {
+                        prefabName = "DisksPole", 
+                        locations = buildingNodes,
+                        rotateWithTrack = false,
+                        rotationspeeds = buildingRotatAnimation,
+                        maxShown = 6,
+                        maxDistanceShown = 2000,
+                        offsets = offsets,
+                        collisionLayer = -4, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                        testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+                    }
+                end
+            end
+
+            --That dart like thingy I don't know what to call it
+            do 
+                --Adjust texture quality base on graphic setting
+                if quality < 4 then
+                    clingTexture = "textures/backgroundBuildings/flydart/ClingderShader_High.png"
+                else
+                    clingTexture = "textures/backgroundBuildings/flydart/ClingderShader_Ultra.png"
+                end
+
+                --Model
+                do
+                    local buildingMesh4 =
+                        BuildMesh {
+                        mesh = "models/background/flydart.obj",
+                        barycentricTangents = true,
+                        calculateNormals = false,
+                        submeshesWhenCombining = false
+                    }
+                    CreateObject {
+                        name = "FlyingThing",
+                        visible = false,
+                        tracknode = "start",
+                        gameobject = {
+                            transform = {pos = {0, 0, 0}, scale = {1.5, 1.5, 1.5}},
+                            mesh = buildingMesh4,
+                            shader = "IlluminDiffuse",
+                            texture = clingTexture,
+                            layer = 13,
+                            shadercolors = {
+                                _Color = "highway"
+                            }
+                        }
+                    }
+                end
+
+                --Model placement & render
+                if buildingNodes3 == nil then
+                    local buildingNodes3 = {}
+                    local buildingRotateAnimation = {}
+                    offsets = {}
+                    for i = 1, #track do
+                        if i % 1200 == 0 and track[i].funkyrot == false and song < 0.83 then
+                            buildingNodes3[#buildingNodes3 + 1] = i
+                            buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 370, 0}
+
+                            --Offset from origin
+                            local xOffset = 80 
+
+                            --Randomize rather the building appear left or right of the track
+                            if math.random(0, 1) > 0.4 then
+                                xOffset = xOffset * -1
+                            end 
+
+                            --Building offset on {x,y,z}
+                            offsets[#offsets + 1] = {xOffset, 2, 0} 
+                        end
+                    end
+
+                    --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
+                    BatchRenderEveryFrame {
+                        prefabName = "FlyingThing", 
+                        locations = buildingNodes3,
+                        rotateWithTrack = true,
+                        rotationspeeds = buildingRotateAnimation,
+                        maxShown = 5,
+                        maxDistanceShown = 2000,
+                        offsets = offsets,
+                        collisionLayer = -7, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                        testAndHideIfCollideWithTrack = false 
+                    }
+                end
+            end
+
+            --Disco ball
+            do
+                --Adjust texture quality base on graphic setting
+                if quality < 4 then
+                    clingTexture = "textures/backgroundBuildings/disco/Discoball_solid_High.png"
+                else
+                    clingTexture = "textures/backgroundBuildings/disco/Discoball_solid_Ultra.png"
+                end
+
+                --Model
+                do
+                    local buildingMesh5 =
+                        BuildMesh {
+                        mesh = "models/background/discoball.obj",
+                        barycentricTangents = true,
+                        calculateNormals = false,
+                        submeshesWhenCombining = false
+                    }
+                    CreateObject {
+                        name = "Discoball",
+                        tracknode = "start",
+                        visible = false,
+                        gameobject = {
+                            transform = {pos = {0, 0, 0}, scale = {105, 105, 105}},
+                            mesh = buildingMesh5,
+                            shader = "IlluminDiffuse",
+                            texture = clingTexture,
+                            layer = 13,
+                            shadercolors = {
+                                _Color = "highway"
+                            }
+                        }
+                    }
+                end
+
+                --Model placement & render
+                if buildingNodes5 == nil then
+                    local buildingNodes5 = {}
+                    offsets = {}
+
+                    for i = 1, #track do
+                        if i % 1750 == 0 and not track[i].funkyrot and song < 0.84 then
+                            buildingNodes5[#buildingNodes5 + 1] = i
+
+                            --Offset from origin
+                            local xOffset = 356 
+
+                            --Randomize rather the building appear left or right of the track
+                            if math.random(0, 1) > 0.5 then
+                                xOffset = xOffset * -1
+                            end 
+
+                            --Building offset on {x,y,z}
+                            offsets[#offsets + 1] = {xOffset, 50, 0} 
+                        end
+                    end
+
+                    --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
+                    BatchRenderEveryFrame {
+                        prefabName = "Discoball", 
+                        locations = buildingNodes5,
+                        rotateWithTrack = true,
+                        maxShown = 5,
+                        maxDistanceShown = 2000,
+                        offsets = offsets,
+                        collisionLayer = -2, --Will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
+                        testAndHideIfCollideWithTrack = true 
+                    }
+                end
+            end
+
+            --Dancing Blocks
+            do
+                --Adjust texture quality base on graphic setting
+                if quality < 4 then
+                    clingTexture = "textures/backgroundBuildings/blockDance/BlockDance_High.png"
+                else
+                    clingTexture = "textures/backgroundBuildings/blockDance/BlockDance_Ultra.png"
+                end
+
+                --Model
+                do
+                    local buildingMesh6 =
+                        BuildMesh {
+                        mesh = "models/background/danceblock.obj",
+                        barycentricTangents = true,
+                        calculateNormals = false,
+                        submeshesWhenCombining = false
+                    }
+                    CreateObject {
+                        name = "BlockDance",
+                        tracknode = "start",
+                        visible = false,
+                        gameobject = {
+                            transform = {pos = {0, 0, 0}, scale = {12, 12, 12}},
+                            mesh = buildingMesh6,
+                            shader = "IlluminDiffuse",
+                            texture = clingTexture,
+                            layer = 13,
+                            shadercolors = {
+                                _Color = "highway"
+                            }
+                        }
+                    }
+                end
+
+                --Model placement & render
+                if buildingNodes6 == nil then
+                    local buildingNodes6 = {}
+                    local buildingRotateAnimation = {}
+                    offsets = {}
+
+                    for i = 1, #track do
+                        if (i % 2310) == 0 and not track[i].funkyrot and song < 0.83 then
+                            buildingNodes6[#buildingNodes6 + 1] = i
+                            buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 200, 0}
+
+                            --Offset from origin
+                            local xOffset = 330 
+
+                            --Randomize rather the building appear left or right of the track
+                            if math.random(0, 1) > 0.5 then
+                                xOffset = xOffset * -1
+                            end 
+
+                            --Building offset on {x,y,z}
+                            offsets[#offsets + 1] = {xOffset, 0, 0} 
+                        end
+                    end
+
+                    --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
+                    BatchRenderEveryFrame {
+                        prefabName = "BlockDance", 
+                        locations = buildingNodes6,
+                        rotateWithTrack = true,
+                        rotationspeeds = buildingRotateAnimation,
+                        maxShown = 5,
+                        maxDistanceShown = 2000,
+                        offsets = offsets,
+                        collisionLayer = -3,
+                        
+                        testAndHideIfCollideWithTrack = false 
+                    }
+                end
+            end
+
+        end --endif quality >= 3
+    end --endif showBackgroundBuilding
+
+end --End of background objects
+
+
+--------------------------------------------------------------------------------
+
+-- End of track object (Also known as endcookie)
+
+--------------------------------------------------------------------------------
+do --End of track object 
+
+    -- Adjust texture quality base on graphic setting
     if quality < 2 then
         portalTexture = "textures/end/Portal_Low.png"
     elseif quality < 3 then
@@ -929,95 +1398,115 @@ do --End of track object (Also known as endcookie)
         portalTexture = "textures/end/Portal_Ultra.png"
     end
 
+    -- Change endcookie layer for 'low' graphic setting (background layer is disabled on 'low')
     if quality < 2 then
         endLayer = 13
     else
         endLayer = 19
     end
 
-    CreateObject {
-        name = "EndCookie_portal",
-        tracknode = "end",
-        visible = false,
-        gameobject = {
-            transform = {pos = {0, 0, -18}, scale = {50, 50, 50}},
-            mesh = "models/end/portal.obj",
-            shader = "IlluminDiffuse",
-            texture = portalTexture,
-            --lookat = "camera",
-            layer = endLayer,
-            shadercolors = {
-                _Color = "highway"
+    -- Models
+    do
+        CreateObject {
+            name = "EndCookie_portal",
+            tracknode = "end",
+            visible = false,
+            gameobject = {
+                transform = {pos = {0, 0, -18}, scale = {50, 50, 50}},
+                mesh = "models/end/portal.obj",
+                shader = "IlluminDiffuse",
+                texture = portalTexture,
+                --lookat = "camera",
+                layer = endLayer,
+                shadercolors = {
+                    _Color = "highway"
+                }
             }
         }
-    }
 
-    CreateObject {
-        name = "EndCookie_outershell",
-        tracknode = "end",
-        gameobject = {
-            transform = {pos = {0, 0, -18}, scale = {50, 50, 50}},
-            mesh = "models/end/outher.obj",
-            shader = "IlluminDiffuse",
-            texture = portalTexture,
-            --lookat = "camera",
-            layer = 19,
-            shadercolors = {
-                _Color = {99, 99, 99}
+        CreateObject {
+            name = "EndCookie_outershell",
+            tracknode = "end",
+            gameobject = {
+                transform = {pos = {0, 0, -18}, scale = {50, 50, 50}},
+                mesh = "models/end/outher.obj",
+                shader = "IlluminDiffuse",
+                texture = portalTexture,
+                --lookat = "camera",
+                layer = 19,
+                shadercolors = {
+                    _Color = {99, 99, 99}
+                }
             }
         }
-    }
 
-    CreateObject {
-        name = "EndCookie_TentInner",
-        tracknode = "end",
-        visible = false,
-        gameobject = {
-            transform = {pos = {0, 0, 15}, scale = {50, 50, 50}},
-            mesh = "models/end/tent.obj",
-            shader = "IlluminDiffuse",
-            --lookat = "camera",
-            texture = "textures/scene/White.png",
-            layer = 19,
-            shadercolors = {
-                _Color = "highway"
+        CreateObject {
+            name = "EndCookie_TentInner",
+            tracknode = "end",
+            visible = false,
+            gameobject = {
+                transform = {pos = {0, 0, 15}, scale = {50, 50, 50}},
+                mesh = "models/end/tent.obj",
+                shader = "IlluminDiffuse",
+                --lookat = "camera",
+                texture = "textures/scene/White.png",
+                layer = 19,
+                shadercolors = {
+                    _Color = "highway"
+                }
             }
         }
-    }
 
-    CreateObject {
-        name = "EndCookie_TentOuter",
-        tracknode = "end",
-        visible = false,
-        gameobject = {
-            transform = {pos = {0, 0, 15}, scale = {50, 50, 50}},
-            mesh = "models/end/tent chell.obj",
-            shader = "IlluminDiffuse",
-            --lookat = "camera",
-            texture = "textures/scene/White.png",
-            layer = 19,
-            shadercolors = {
-                _Color = {230, 230, 230}
+        CreateObject {
+            name = "EndCookie_TentOuter",
+            tracknode = "end",
+            visible = false,
+            gameobject = {
+                transform = {pos = {0, 0, 15}, scale = {50, 50, 50}},
+                mesh = "models/end/tent chell.obj",
+                shader = "IlluminDiffuse",
+                --lookat = "camera",
+                texture = "textures/scene/White.png",
+                layer = 19,
+                shadercolors = {
+                    _Color = {230, 230, 230}
+                }
             }
         }
-    }
+    end
 
+    -- Placement & render
     if endCookieNode == nil then
         local buildingRotatAnimation = {}
         local buildingRotatAnimation2 = {}
         local endCookieNode = {}
         local offsets = {}
+
         for i = 1, #track do
             if i % 1000 == 0 then
                 buildingRotatAnimation[#buildingRotatAnimation + 1] = {0, 0, 11}
                 buildingRotatAnimation2[#buildingRotatAnimation2 + 1] = {0, 0, -11}
                 endCookieNode[#endCookieNode + 1] = #track
+                
                 offsets[#offsets + 1] = {0, 0, 0}
                 break
             end
         end
+
+        -- Renders the objects
         BatchRenderEveryFrame {
-            prefabName = "EndCookie_TentInner", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
+            prefabName = "EndCookie_TentInner", 
+            locations = endCookieNode, -- Place only one at the end of track, same logic goes to all renders below
+            rotateWithTrack = true,
+            rotationspeeds = buildingRotatAnimation,
+            maxShown = 1,
+            maxDistanceShown = 100000,
+            offsets = offsets,
+            collisionLayer = -1, 
+            testAndHideIfCollideWithTrack = false 
+        }
+        BatchRenderEveryFrame {
+            prefabName = "EndCookie_TentOuter", 
             locations = endCookieNode,
             rotateWithTrack = true,
             rotationspeeds = buildingRotatAnimation,
@@ -1025,23 +1514,10 @@ do --End of track object (Also known as endcookie)
             maxDistanceShown = 100000,
             offsets = offsets,
             collisionLayer = -1,
-             --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-            testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+            testAndHideIfCollideWithTrack = false
         }
         BatchRenderEveryFrame {
-            prefabName = "EndCookie_TentOuter", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-            locations = endCookieNode,
-            rotateWithTrack = true,
-            rotationspeeds = buildingRotatAnimation,
-            maxShown = 1,
-            maxDistanceShown = 100000,
-            offsets = offsets,
-            collisionLayer = -1,
-             --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-            testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
-        }
-        BatchRenderEveryFrame {
-            prefabName = "EndCookie_portal", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
+            prefabName = "EndCookie_portal", 
             locations = endCookieNode,
             rotateWithTrack = true,
             rotationspeeds = buildingRotatAnimation2,
@@ -1049,291 +1525,345 @@ do --End of track object (Also known as endcookie)
             maxDistanceShown = 100000,
             offsets = offsets,
             collisionLayer = -1,
-             --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-            testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
+            testAndHideIfCollideWithTrack = false 
         }
     end
-end --End of end object section
-
-do --Background buildings
-    if showBackgroundBuilding then
-        if quality >= 3 then
-
-            --Disks
-            local buildingMesh =
-                BuildMesh {
-                mesh = "models/background/disks/disk.obj",
-                barycentricTangents = true,
-                calculateNormals = false,
-                submeshesWhenCombining = false
-            }
-            CreateObject {
-                name = "Disks",
-                tracknode = "start",
-                gameobject = {
-                    mesh = buildingMesh,
-                    shader = "VertexColorUnlitTintedAlpha2",
-                    shadercolors = {
-                        _Color = "highway"
-                    },
-                    transform = {scale = {scaletype = "intensity", min = {20, 90, 20}, max = {90, 90, 90}}},
-                    texture = "textures/rail/cliff side.png",
-                    layer = 19
-                }
-            }
-            local buildingMesh_1 =
-                BuildMesh {
-                mesh = "models/background/disks/disksupport.obj",
-                barycentricTangents = true,
-                calculateNormals = false,
-                submeshesWhenCombining = false
-            }
-            CreateObject {
-                name = "DisksPole",
-                tracknode = "start",
-                gameobject = {
-                    mesh = buildingMesh_1,
-                    shader = "VertexColorUnlitTintedAlpha2",
-                    shadercolors = {
-                        _Color = "highway"
-                    },
-                    transform = {scale = {45, 90, 45}},
-                    texture = "textures/rail/cliff side.png",
-                    layer = 19
-                }
-            }
-            if buildingNodes == nil then
-                local buildingRotatAnimation = {}
-                local buildingNodes = {}
-                offsets = {}
-                for i = 1, #track do
-                    if i % 170 == 0 then
-                        buildingRotatAnimation[#buildingRotatAnimation + 1] = {0, 0, 0}
-                        buildingNodes[#buildingNodes + 1] = i
-                        local xOffset = 90 + 1650 * math.random()
-                        local yOffset = math.random(0, 140)
-                        local zOffset = math.random(-1, 0)
-                        if xOffset < 300 then
-                            xOffset = 670
-                        end
-                        if math.random() > 0.4 then
-                            xOffset = xOffset * -1
-                        end
-                        offsets[#offsets + 1] = {xOffset, yOffset, zOffset}
-                    end
-                end
-                BatchRenderEveryFrame {
-                    prefabName = "Disks", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                    locations = buildingNodes,
-                    rotateWithTrack = false,
-                    rotationspeeds = buildingRotatAnimation,
-                    maxShown = 550,
-                    maxDistanceShown = 2000,
-                    offsets = offsets,
-                    collisionLayer = -4,
-                     --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
-                }
-                BatchRenderEveryFrame {
-                    prefabName = "DisksPole", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                    locations = buildingNodes,
-                    rotateWithTrack = false,
-                    rotationspeeds = buildingRotatAnimation,
-                    maxShown = 5,
-                    maxDistanceShown = 2000,
-                    offsets = offsets,
-                    collisionLayer = -4,
-                     --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
-                }
-            end
-
-            --That flying one headed thingy I don't know what to call it
-            if quality < 4 then
-                clingTexture = "textures/backgroundBuildings/flydart/ClingderShader_High.png"
-            else
-                clingTexture = "textures/backgroundBuildings/flydart/ClingderShader_Ultra.png"
-            end
-            local buildingMesh4 =
-                BuildMesh {
-                mesh = "models/background/flydart.obj",
-                barycentricTangents = true,
-                calculateNormals = false,
-                submeshesWhenCombining = false
-            }
-            CreateObject {
-                name = "FlyingThing",
-                visible = false,
-                tracknode = "start",
-                gameobject = {
-                    transform = {pos = {0, 0, 0}, scale = {1.5, 1.5, 1.5}},
-                    mesh = buildingMesh4,
-                    shader = "IlluminDiffuse",
-                    texture = clingTexture,
-                    layer = 13,
-                    shadercolors = {
-                        _Color = "highway"
-                    }
-                }
-            }
-            if buildingNodes3 == nil then
-                local buildingNodes3 = {}
-                local buildingRotateAnimation = {}
-                offsets = {}
-                for i = 1, #track do
-                    if i % 1200 == 0 and track[i].funkyrot == false and song < 0.83 then
-                        buildingNodes3[#buildingNodes3 + 1] = i
-                        buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 370, 0}
-                        local xOffset = 80 --Distance between building and track along X-axis (left and right)
-                        if math.random(0, 1) > 0.4 then
-                            xOffset = xOffset * -1
-                        end --Randomize rather the building appear left or right of the track
-                        offsets[#offsets + 1] = {xOffset, 2, 0} --Building offset on {x,y,z}
-                    end
-                end
-
-                BatchRenderEveryFrame {
-                    prefabName = "FlyingThing", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                    locations = buildingNodes3,
-                    rotateWithTrack = true,
-                    rotationspeeds = buildingRotateAnimation,
-                    maxShown = 5,
-                    maxDistanceShown = 2000,
-                    offsets = offsets,
-                    collisionLayer = -7,
-                     --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = false --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
-                }
-            end
-
-            --Disco ball
-            if quality < 4 then
-                clingTexture = "textures/backgroundBuildings/disco/Discoball_solid_High.png"
-            else
-                clingTexture = "textures/backgroundBuildings/disco/Discoball_solid_Ultra.png"
-            end
-            local buildingMesh5 =
-                BuildMesh {
-                mesh = "models/background/discoball.obj",
-                barycentricTangents = true,
-                calculateNormals = false,
-                submeshesWhenCombining = false
-            }
-            CreateObject {
-                name = "Discoball",
-                tracknode = "start",
-                visible = false,
-                gameobject = {
-                    transform = {pos = {0, 0, 0}, scale = {105, 105, 105}},
-                    mesh = buildingMesh5,
-                    shader = "IlluminDiffuse",
-                    texture = clingTexture,
-                    layer = 13,
-                    shadercolors = {
-                        _Color = "highway"
-                    }
-                }
-            }
-            if buildingNodes5 == nil then
-                local buildingNodes5 = {}
-                offsets = {}
-                for i = 1, #track do
-                    if i % 1750 == 0 and not track[i].funkyrot and song < 0.84 then
-                        buildingNodes5[#buildingNodes5 + 1] = i
-                        local xOffset = 356 --Distance between building and track along X-axis (left and right)
-                        if math.random(0, 1) > 0.5 then
-                            xOffset = xOffset * -1
-                        end --Randomize rather the building appear left or right of the track
-                        offsets[#offsets + 1] = {xOffset, 50, 0} --Building offset on {x,y,z}
-                    end
-                end
-
-                BatchRenderEveryFrame {
-                    prefabName = "Discoball", --Tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                    locations = buildingNodes5,
-                    rotateWithTrack = true,
-                    maxShown = 5,
-                    maxDistanceShown = 2000,
-                    offsets = offsets,
-                    collisionLayer = -2, --Will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = true --If true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
-                }
-            end
-
-            --Dancing Blocks
-            if quality < 4 then
-                clingTexture = "textures/backgroundBuildings/blockDance/BlockDance_High.png"
-            else
-                clingTexture = "textures/backgroundBuildings/blockDance/BlockDance_Ultra.png"
-            end
-            local buildingMesh6 =
-                BuildMesh {
-                mesh = "models/background/danceblock.obj",
-                barycentricTangents = true,
-                calculateNormals = false,
-                submeshesWhenCombining = false
-            }
-            CreateObject {
-                name = "BlockDance",
-                tracknode = "start",
-                visible = false,
-                gameobject = {
-                    transform = {pos = {0, 0, 0}, scale = {12, 12, 12}},
-                    mesh = buildingMesh6,
-                    shader = "IlluminDiffuse",
-                    texture = clingTexture,
-                    layer = 13,
-                    shadercolors = {
-                        _Color = "highway"
-                    }
-                }
-            }
-            if buildingNodes6 == nil then
-                local buildingNodes6 = {}
-                local buildingRotateAnimation = {}
-                offsets = {}
-                for i = 1, #track do
-                    if (i % 2310) == 0 and not track[i].funkyrot and song < 0.83 then
-                        buildingNodes6[#buildingNodes6 + 1] = i
-                        buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 200, 0}
-                        local xOffset = 330 --Distance between building and track along X-axis (left and right)
-                        if math.random(0, 1) > 0.5 then
-                            xOffset = xOffset * -1
-                        end --Randomize rather the building appear left or right of the track
-                        offsets[#offsets + 1] = {xOffset, 0, 0} --Building offset on {x,y,z}
-                    end
-                end
-
-                BatchRenderEveryFrame {
-                    prefabName = "BlockDance", --tell the game to render these prefabs in a batch (with Graphics.DrawMesh) every frame
-                    locations = buildingNodes6,
-                    rotateWithTrack = true,
-                    rotationspeeds = buildingRotateAnimation,
-                    maxShown = 5,
-                    maxDistanceShown = 2000,
-                    offsets = offsets,
-                    collisionLayer = -3,
-                     
-                    testAndHideIfCollideWithTrack = false 
-                }
-            end
+end --End of end object
 
 
-        end --endif quality >= 3
-    end --endif showBackgroundBuilding
-end --End of building section
+--------------------------------------------------------------------------------
 
-do --Rails
-    -- rails are the bulk of the graphics in audiosurf. Each one is a 2D shape extruded down the length of the track.
-	
-    --CreateRepeatedMeshRail {
-    --    prefabName = "RailSide",
-    --    colorMode = "static",
-    --    buildlive = false,
-    --   spacing = 150,
-    --    calculatenormals = false
-    --}
+-- Rails
+-- (rails are the bulk of the graphics in audiosurf. Each one is a 2D shape extruded down the length of the track.)
 
+--------------------------------------------------------------------------------
+
+--        Left rail upperleft outline O-------------------O Left rail upperright outline         	   Right rail upperleft outline	O-------------------O Right rail upperright outline
+--        							  |                   |                  														|                   |
+--        							  |                   |                  														|                   |
+--        							  |                   | Left rail bottomright outline             Right rail bottomleft outline |                   |
+--        							  |                   O                  														O                   |
+--        							  |    (Left guard)   | ----------------------------------------------------------------------- |    (Right guard)  |
+--        							  |                   |                  			(Road surface)							    |                   |
+--        							  |                   |                  														|                   |
+--        							  |                   |                  														|                   |
+--        							  |                   |                  														|                   |
+--       Left rail bottomleft outline O--------------------                                                                         --------------------O Right rail bottomright outline
+
+----------------------
+-- Road surface
+----------------------
+do --Road surface
+    if not wakeboard then
+        CreateRail {
+            positionOffset = {
+                x = 0,
+                y = 0
+            },
+            crossSectionShape = {
+                {x = -trackWidth, y = 0},
+                {x = trackWidth, y = 0}
+            },
+            perShapeNodeColorScalers = {
+                1,
+                1
+            },
+            colorMode = "static",
+            layer = 12,
+            color = {r = 251, g = 251, b = 251, a = 240},
+            renderqueue = 2001,
+			fullfuture = showEntireRoad,
+            flatten = false,
+            shader = "VertexColorUnlitTintedAlpha"
+        }
+    end
+end --End of road surface
+
+----------------------
+-- Guard rails
+----------------------
+do --Guard rails
+    local shaderName = "DiffuseVertexColored2"
+    local shaderColor = { _Color = "highway", a = 50 }
+    local railLayer = 13
+    local renderQueue = 1999
+
+    -- Left guard
+    CreateRail {
+        positionOffset = {
+            x = -trackWidth - .2,
+            y = 0
+        },
+        crossSectionShape = {
+            {x = -.64, y = 0.49},
+            {x = .29, y = 0.49},
+            {x = .29, y = -0.49},
+            {x = -.64, y = -0.49}
+        },
+        perShapeNodeColorScalers = {
+            .9,
+            .9,
+            .9,
+            .9
+        },
+        colorMode = "highway",
+        color = {r = 255, g = 255, b = 255},
+        flatten = false,
+        renderqueue = renderQueue,
+        fullfuture = showEntireRoad,
+        shadowcaster = false,
+        shadowreceiver = true,
+        calculatenormals = false,
+        shader = shaderName,
+        shadercolors = shaderColor,
+        layer = railLayer
+    }
+
+    -- Right guard
+    CreateRail {
+        positionOffset = {
+            x = trackWidth + .2,
+            y = 0
+        },
+        crossSectionShape = {
+            {x = -.63, y = 0.49},
+            {x = .31, y = 0.49},
+            {x = .31, y = -0.49},
+            {x = -.63, y = -0.49}
+        },
+        perShapeNodeColorScalers = {
+            .9,
+            .9,
+            .9,
+            .9
+        },
+        colorMode = "highway",
+        color = {r = 255, g = 255, b = 255},
+        flatten = false,
+        fullfuture = showEntireRoad,
+        renderqueue = renderQueue,
+        shadowcaster = false,
+        shadowreceiver = true,
+        calculatenormals = false,
+        shader = shaderName,
+        shadercolors = shaderColor,
+        layer = railLayer
+    }
+
+end --End of guard rails
+
+----------------------
+-- Rail outlines
+----------------------
+do --Rail outlines
+    local outlineColor = {r = 101, g = 101, b = 101}
+    local shaderName = "DiffuseVertexColored2"
+    local shaderColor = { _Color = {r = 0, g = 0, b = 0} }
+    local railLayer = 13
+
+    --Left
+    if not wakeboard then
+        --Left rail upperleft outline
+        CreateRail {
+            positionOffset = {
+                x = -trackWidth + 0.1,
+                y = 0.5
+            },
+            crossSectionShape = {
+                {x = -.01, y = .01},
+                {x = .01, y = .01},
+                {x = .01, y = -.01},
+                {x = -.01, y = -.01}
+            },
+            perShapeNodeColorScalers = {
+                .8,
+                1,
+                .8,
+                .8
+            },
+            colorMode = "static",
+            color = outlineColor,
+            flatten = false,
+            fullfuture = showEntireRoad,
+            shadowcaster = false,
+            shadowreceiver = false,
+            calculatenormals = true,
+            shader = shaderName,
+            shadercolors = shaderColor,
+            layer = railLayer
+        }
+
+        --Left rail bottomright outline
+        CreateRail {
+            positionOffset = {
+                x = -trackWidth + 0.11,
+                y = 0
+            },
+            crossSectionShape = {
+                {x = -.01, y = .01},
+                {x = .01, y = .01},
+                {x = .01, y = -.01},
+                {x = -.01, y = -.01}
+            },
+            perShapeNodeColorScalers = {
+                .8,
+                1,
+                .8,
+                .8
+            },
+            colorMode = "static",
+            color = outlineColor,
+            flatten = false,
+            fullfuture = showEntireRoad,
+            shadowcaster = false,
+            shadowreceiver = false,
+            calculatenormals = true,
+            shader = shaderName,
+            shadercolors = shaderColor,
+            layer = railLayer
+        }
+
+        --Left rail upperright outline
+        CreateRail {
+            
+            positionOffset = {
+                x = -trackWidth - 0.84,
+                y = 0.5
+            },
+            crossSectionShape = {
+                {x = -.01, y = .01},
+                {x = .01, y = .01},
+                {x = .01, y = -.01},
+                {x = -.01, y = -.01}
+            },
+            perShapeNodeColorScalers = {
+                .8,
+                1,
+                .8,
+                .8
+            },
+            colorMode = "static",
+            color = outlineColor,
+            flatten = false,
+            fullfuture = showEntireRoad,
+            shadowcaster = false,
+            shadowreceiver = false,
+            calculatenormals = true,
+            shader = shaderName,
+            shadercolors = shaderColor,
+            layer = railLayer
+        }
+    end
+
+    --Right
+    if not wakeboard then
+        --Right rail upperleft outline
+        CreateRail {
+            
+            positionOffset = {
+                x = trackWidth - 0.46,
+                y = 0.5
+            },
+            crossSectionShape = {
+                {x = -.01, y = .01},
+                {x = .01, y = .01},
+                {x = .01, y = -.01},
+                {x = -.01, y = -.01}
+            },
+            perShapeNodeColorScalers = {
+                .8,
+                1,
+                .8,
+                .8
+            },
+            colorMode = "static",
+            color = outlineColor,
+            flatten = false,
+            fullfuture = showEntireRoad,
+            shadowcaster = false,
+            shadowreceiver = false,
+            calculatenormals = true,
+            shader = shaderName,
+            shadercolors = shaderColor,
+            layer = railLayer
+        }
+
+        --Right rail upperright outline
+        CreateRail {
+            
+            positionOffset = {
+                x = trackWidth + 0.51,
+                y = 0.5
+            },
+            crossSectionShape = {
+                {x = -.01, y = .01},
+                {x = .01, y = .01},
+                {x = .01, y = -.01},
+                {x = -.01, y = -.01}
+            },
+            perShapeNodeColorScalers = {
+                .8,
+                1,
+                .8,
+                .8
+            },
+            colorMode = "static",
+            color = outlineColor,
+            flatten = false,
+            fullfuture = showEntireRoad,
+            shadowcaster = false,
+            shadowreceiver = false,
+            calculatenormals = true,
+            shader = shaderName,
+            shadercolors = shaderColor,
+            layer = railLayer
+        }
+
+        --Right rail bottomleft outline
+        CreateRail {
+            
+            positionOffset = {
+                x = trackWidth - 0.445,
+                y = 0
+            },
+            crossSectionShape = {
+                {x = -.01, y = .01},
+                {x = .01, y = .01},
+                {x = .01, y = -.01},
+                {x = -.01, y = -.01}
+            },
+            perShapeNodeColorScalers = {
+                .8,
+                1,
+                .8,
+                .8
+            },
+            colorMode = "static",
+            color = outlineColor,
+            flatten = false,
+            fullfuture = showEntireRoad,
+            shadowcaster = false,
+            shadowreceiver = false,
+            calculatenormals = true,
+            shader = shaderName,
+            shadercolors = shaderColor,
+            layer = railLayer
+        }
+    end
+
+end --End of rail outline
+
+----------------------
+-- Lane divider
+----------------------
+
+--                         o                     o
+-- -----------------------------------------------------------------------
+--                             (Road surface)
+--
+-- 'o' denotes lane divider positions
+
+do --Lane divier
     if not wakeboard then
         local laneDividers = skinvars["lanedividers"]
         for i = 1, #laneDividers do
@@ -1361,7 +1891,29 @@ do --Rails
             }
         end
     end
+end --End of lane divider
 
+----------------------
+-- Shoulder lanes
+----------------------
+
+-- Casual:
+--                        o                                                                 o
+--      ****************-----------------------------------------------------------------------****************-
+--                                                     (Road surface)
+--
+--      'o' denotes shoulder lane line positions
+--      '****' denotes shoulder roads
+
+
+-- Mono/Ninja:
+--        o                                                                 o
+--      -----------------------------------------------------------------------
+--                                  (Road surface)
+--
+--      'o' denotes shoulder lane line positions
+
+do --Shoulder lanes
     if not wakeboard then
         local shoulderLines = skinvars["shoulderlines"]
         for i = 1, #shoulderLines do
@@ -1398,876 +1950,462 @@ do --Rails
             }
         end
     end
+end --End of shoulder lanes
 
-    --        left rail upperleft outline O-------------------O left rail upperright outline         	   right rail upperleft outline	O-------------------O right rail upperright outline
-    --        							  |                   |                  														|                   |
-    --        							  |                   |                  														|                   |
-    --        							  |                   | left rail bottomright outline             right rail bottomleft outline |                   |
-    --        							  |                   O                  														O                   |
-    --        							  |    (left rail)    | ----------------------------------------------------------------------- |    (right rail)   |
-    --        							  |                   |                  			(Road surface)							    |                   |
-    --        							  |                   |                  														|                   |
-    --        							  |                   |                  														|                   |
-    --        							  |                   |                  														|                   |
-    --       left rail bottomleft outline O--------------------                                                                         --------------------O right rail bottomright outline
+----------------------
+-- Rail rim lights
+----------------------
 
+--            <------------ Left rail ouward light                            Right rail ouward light  ------------>    
+--      ---------------------                                                                         --------------------- 
+--      |                   | |                 													| |                   |
+--      |                   | | Left rail light                 				   Right rail light | |                   |
+--      |                   | V                                                                     V |                   |
+--      |                   |                 														  |                   |
+--      |    (Left guard)   | ----------------------------------------------------------------------- |    (Right guard)  |
+--      |                   |                  			(Road surface)							      |                   |
+--      |                   | ^                 												    ^ |                   |
+--      |                   | | Left rail reflection light              Right rail reflection light | |                   |
+--      |                   | |                 													| |                   |
+--      --------------------                                                                          ---------------------
+
+do --Rail rim lights
     if not wakeboard then
-        CreateRail {
-            --Road surface
-            positionOffset = {
-                x = 0,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -trackWidth, y = 0},
-                {x = trackWidth, y = 0}
-            },
-            perShapeNodeColorScalers = {
-                1,
-                1
-            },
-            colorMode = "static",
-            layer = 12,
-            color = {r = 251, g = 251, b = 251, a = 238},
-            renderqueue = 2001,
-			fullfuture = showEntireRoad,
-            flatten = false,
-            shader = "VertexColorUnlitTintedAlpha"
-        }
-    end
 
-    if not wakeboard then
-        CreateRail {
-            --left rail
-            positionOffset = {
-                x = -trackWidth - .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.64, y = 0.49},
-                {x = .29, y = 0.49},
-                {x = .29, y = -0.49},
-                {x = -.64, y = -0.49}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9,
-                .9,
-                .9
-            },
-            colorMode = "highway",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            renderqueue = 1999,
-            fullfuture = showEntireRoad,
-            shadowcaster = false,
-            shadowreceiver = true,
-            calculatenormals = false,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {_Color = "highway", a = 50},
-            layer = 13
-        }
-
-        CreateRail {
-            --left rail light
-            positionOffset = {
-                x = -trackWidth - .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.65, y = 0.5},
-                {x = .3, y = 0.5},
-                {x = .3, y = -0.01},
-                {x = -.65, y = -0.01}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9
-            },
-            colorMode = "static",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            renderqueue = 2001,
-            wrapnodeshape = false,
-            texture = "textures/rail/left rail light.png",
-            fullfuture = showEntireRoad,
-            calculatenormals = false,
-            shader = "VertexColorUnlitTintedAlpha",
-            layer = 13
-        }
-
-        CreateRail {
-            --left rail outward light
-            positionOffset = {
-                x = -trackWidth - .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.66, y = -0.55},
-                {x = -.66, y = 0.5}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9
-            },
-            colorMode = "static",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            wrapnodeshape = false,
-            texture = "textures/rail/left rail light.png",
-            fullfuture = showEntireRoad,
-            calculatenormals = false,
-            shader = "VertexColorUnlitTintedAlpha2",
-            layer = 13
-        }
-
-        CreateRail {
-            --left rail reflection light
-            positionOffset = {
-                x = -trackWidth - .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.64, y = 0},
-                {x = 0.30, y = 0},
-                {x = 0.30, y = -0.56},
-                {x = -.64, y = -0.56}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9
-            },
-            colorMode = "static",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            renderqueue = 2000,
-            wrapnodeshape = false,
-            texture = "textures/rail/left rail light.png",
-            textureMode = "repeataroundreverse",
-            fullfuture = showEntireRoad,
-            calculatenormals = false,
-            shader = "VertexColorUnlitTintedAlpha",
-            layer = 13
-        }
-
-        CreateRail {
-            --left rail upperright outline
-            positionOffset = {
-                x = -trackWidth + 0.1,
-                y = 0.5
-            },
-            crossSectionShape = {
-                {x = -.01, y = .01},
-                {x = .01, y = .01},
-                {x = .01, y = -.01},
-                {x = -.01, y = -.01}
-            },
-            perShapeNodeColorScalers = {
-                .8,
-                1,
-                .8,
-                .8
-            },
-            colorMode = "static",
-            color = {r = 55, g = 55, b = 55},
-            flatten = false,
-            fullfuture = showEntireRoad,
-            shadowcaster = false,
-            shadowreceiver = false,
-            calculatenormals = true,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {
-                _Color = {r = 0, g = 0, b = 0}
-            },
-            layer = 13
-        }
-
-        CreateRail {
-            --right rail upperleft outline
-            positionOffset = {
-                x = trackWidth - 0.46,
-                y = 0.5
-            },
-            crossSectionShape = {
-                {x = -.01, y = .01},
-                {x = .01, y = .01},
-                {x = .01, y = -.01},
-                {x = -.01, y = -.01}
-            },
-            perShapeNodeColorScalers = {
-                .8,
-                1,
-                .8,
-                .8
-            },
-            colorMode = "static",
-            color = {r = 55, g = 55, b = 55},
-            flatten = false,
-            fullfuture = showEntireRoad,
-            shadowcaster = false,
-            shadowreceiver = false,
-            calculatenormals = true,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {
-                _Color = {r = 0, g = 0, b = 0}
-            },
-            layer = 13
-        }
-
-        CreateRail {
-            --right rail upperright outline
-            positionOffset = {
-                x = trackWidth + 0.5,
-                y = 0.5
-            },
-            crossSectionShape = {
-                {x = -.01, y = .01},
-                {x = .01, y = .01},
-                {x = .01, y = -.01},
-                {x = -.01, y = -.01}
-            },
-            perShapeNodeColorScalers = {
-                .8,
-                1,
-                .8,
-                .8
-            },
-            colorMode = "static",
-            color = {r = 55, g = 55, b = 55},
-            flatten = false,
-            fullfuture = showEntireRoad,
-            shadowcaster = false,
-            shadowreceiver = false,
-            calculatenormals = true,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {
-                _Color = {r = 0, g = 0, b = 0}
-            },
-            layer = 13
-        }
-
-        CreateRail {
-            --right rail bottomleft outline
-            positionOffset = {
-                x = trackWidth - 0.45,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.03, y = .01},
-                {x = .03, y = .01},
-                {x = .03, y = -.01},
-                {x = -.03, y = -.01}
-            },
-            perShapeNodeColorScalers = {
-                .8,
-                1,
-                .8,
-                .8
-            },
-            colorMode = "static",
-            color = {r = 55, g = 55, b = 55},
-            flatten = false,
-            fullfuture = showEntireRoad,
-            shadowcaster = false,
-            shadowreceiver = false,
-            calculatenormals = true,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {
-                _Color = {r = 0, g = 0, b = 0}
-            },
-            layer = 13
-        }
-
-        CreateRail {
-            --left rail bottomright outline
-            positionOffset = {
-                x = -trackWidth + 0.10,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.02, y = .01},
-                {x = .02, y = .01},
-                {x = .02, y = -.01},
-                {x = -.02, y = -.01}
-            },
-            perShapeNodeColorScalers = {
-                .8,
-                1,
-                .8,
-                .8
-            },
-            colorMode = "static",
-            color = {r = 55, g = 55, b = 55},
-            flatten = false,
-            fullfuture = showEntireRoad,
-            shadowcaster = false,
-            shadowreceiver = false,
-            calculatenormals = true,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {
-                _Color = {r = 0, g = 0, b = 0}
-            },
-            layer = 13
-        }
-
-        CreateRail {
-            --left rail upper left outline
-            positionOffset = {
-                x = -trackWidth - 0.86,
-                y = 0.5
-            },
-            crossSectionShape = {
-                {x = -.01, y = .01},
-                {x = .01, y = .01},
-                {x = .01, y = -.01},
-                {x = -.01, y = -.01}
-            },
-            perShapeNodeColorScalers = {
-                .8,
-                1,
-                .8,
-                .8
-            },
-            colorMode = "static",
-            color = {r = 55, g = 55, b = 55},
-            flatten = false,
-            fullfuture = showEntireRoad,
-            shadowcaster = false,
-            shadowreceiver = false,
-            calculatenormals = true,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {
-                _Color = {r = 255, g = 255, b = 255}
-            },
-            layer = 13
-        }
-
-        CreateRail {
-            --right rail
-            positionOffset = {
-                x = trackWidth + .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.63, y = 0.49},
-                {x = .31, y = 0.49},
-                {x = .31, y = -0.49},
-                {x = -.63, y = -0.49}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9,
-                .9,
-                .9
-            },
-            colorMode = "highway",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            fullfuture = showEntireRoad,
-            renderqueue = 1999,
-            shadowcaster = false,
-            shadowreceiver = true,
-            calculatenormals = false,
-            shader = "VertexColorLitTinedAdd",
-            shadercolors = {_Color = "highway", a = 50},
-            layer = 13
-        }
-
-        CreateRail {
-            --right rail light
-            positionOffset = {
-                x = trackWidth + .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = -.64, y = 0},
-                {x = -.64, y = 0.5},
-                {x = .33, y = 0.5},
-                {x = .33, y = 0.5}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9
-            },
-            colorMode = "static",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            renderqueue = 2001,
-            wrapnodeshape = false,
-            texture = "textures/rail/right rail light.png",
-            textureMode = "repeataroundreverse",
-            fullfuture = showEntireRoad,
-            calculatenormals = false,
-            shader = "VertexColorUnlitTintedAlpha",
-            layer = 13
-        }
-
-        CreateRail {
-            --right rail reflection light
-            positionOffset = {
-                x = trackWidth + .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = 0.30, y = -0.56},
-                {x = -.64, y = -0.56},
-                {x = -.64, y = 0},
-                {x = 0.30, y = 0}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9
-            },
-            colorMode = "static",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            renderqueue = 2000,
-            wrapnodeshape = false,
-            texture = "textures/rail/right rail light.png",
-            textureMode = "repeataroundreverse",
-            fullfuture = showEntireRoad,
-            calculatenormals = false,
-            shader = "VertexColorUnlitTintedAlpha",
-            layer = 13
-        }
-
-        CreateRail {
-            --right rail outward light
-            positionOffset = {
-                x = trackWidth + .2,
-                y = 0
-            },
-            crossSectionShape = {
-                {x = 0.32, y = 0.5},
-                {x = 0.32, y = -0.55}
-            },
-            perShapeNodeColorScalers = {
-                .9,
-                .9
-            },
-            colorMode = "static",
-            color = {r = 255, g = 255, b = 255},
-            flatten = false,
-            renderqueue = 2004,
-            wrapnodeshape = false,
-            texture = "textures/rail/right rail light.png",
-            fullfuture = showEntireRoad,
-            calculatenormals = false,
-            shader = "VertexColorUnlitTintedAlpha2",
-            layer = 13
-        }
-    end
-
-    --                 Left rail O______________O Right rail
-    --							  (Road surface)
-    --							/				\
-    --	      (Left cliff)	/						\ (Right cliff)
-    --					/								\
-    --				X (Cliff outline)	    (Cliff outline) X
-    --			/												\
-    --		   |												 |
-    --		   | (Left side cliff)			   (Right side cliff)|
-    --		   |												 |
-    --		   X (Cliff outline)				 (Cliff outline) X
-    --		   |												 |
-
-    if not wakeboard then
-        if not oneColorCliff then
+        --Left
+        do
+            --Left rail light
             CreateRail {
-                --right cliff
                 positionOffset = {
-                    x = 0,
+                    x = -trackWidth - .2,
                     y = 0
                 },
                 crossSectionShape = {
-                    {x = trackWidth + 14, y = -11},
-                    {x = trackWidth + 33, y = -20},
-                    {x = trackWidth + 44.5, y = -29}
+                    {x = -.65, y = 0.5},
+                    {x = .3, y = 0.5},
+                    {x = .3, y = -0.01},
+                    {x = -.65, y = -0.01}
                 },
                 perShapeNodeColorScalers = {
-                    1,
-                    1,
-                    1,
-                    1
-                },
-                colorMode = "hallway",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                behind_renderdist = 10,
-                wrapnodeshape = false,
-                texture = "textures/rail/big cliff.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 3 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                layer = 13
-            }
-
-            CreateRail {
-                --left cliff
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = -trackWidth - 43, y = -29},
-                    {x = -trackWidth - 33, y = -20},
-                    {x = -trackWidth - 14, y = -11}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1,
-                    1,
-                    1
-                },
-                colorMode = "hallway",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/big cliff.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 3 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                layer = 13
-            }
-
-            CreateRail {
-                --left side cliff
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = -trackWidth - 43, y = -80},
-                    {x = -trackWidth - 43, y = -29}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1
-                },
-                colorMode = "hallway",
-                --colorMode="static",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/cliff side2.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                --shadercolors={
-                --		_Color = "highway"
-                --	},
-                layer = 13
-            }
-
-            CreateRail {
-                --right side cliff
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = trackWidth + 44, y = -29},
-                    {x = trackWidth + 44, y = -80}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1
-                },
-                colorMode = "highway",
-                --colorMode="static",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/cliff side.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                --shadercolors={
-                --		_Color = "highway"
-                --	},
-                layer = 13
-            }
-
-            CreateRail {
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = -trackWidth - 14, y = -11},
-                    {x = -trackWidth - 0, y = -11}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1
-                },
-                colorMode = "highway",
-                --colorMode="static",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/cliff side.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                --shadercolors={
-                --		_Color = "highway"
-                --	},
-                layer = 13
-            }
-
-            CreateRail {
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = trackWidth + 0, y = -11},
-                    {x = trackWidth + 14, y = -11}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1
-                },
-                colorMode = "highway",
-                --colorMode="static",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/cliff side2.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                --shadercolors={
-                --		_Color = "highway"
-                --	},
-                layer = 13
-            }
-        else
-            CreateRail {
-                --right cliff
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = trackWidth + 14, y = -11},
-                    {x = trackWidth + 33, y = -20},
-                    {x = trackWidth + 44.5, y = -29}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1,
-                    1,
-                    1
+                    .9,
+                    .9
                 },
                 colorMode = "static",
                 color = {r = 255, g = 255, b = 255},
                 flatten = false,
-                behind_renderdist = 10,
+                renderqueue = 2001,
                 wrapnodeshape = false,
-                texture = "textures/big cliff.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 3 / 63500),
+                texture = "textures/rail/left rail light.png",
+                fullfuture = showEntireRoad,
                 calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                shadercolors = {
-                    _Color = "highway"
-                },
+                shader = "VertexColorUnlitTintedAlpha",
                 layer = 13
             }
 
+            --Left rail outward light
             CreateRail {
-                --left cliff
                 positionOffset = {
-                    x = 0,
+                    x = -trackWidth - .2,
                     y = 0
                 },
                 crossSectionShape = {
-                    {x = -trackWidth - 43, y = -29},
-                    {x = -trackWidth - 33, y = -20},
-                    {x = -trackWidth - 14, y = -11}
+                    {x = -.66, y = -0.55},
+                    {x = -.66, y = 0.5}
                 },
                 perShapeNodeColorScalers = {
-                    1,
-                    1,
-                    1,
-                    1
+                    .9,
+                    .9
                 },
                 colorMode = "static",
                 color = {r = 255, g = 255, b = 255},
                 flatten = false,
                 wrapnodeshape = false,
-                texture = "textures/big cliff.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 3 / 63500),
+                texture = "textures/rail/left rail light.png",
+                fullfuture = showEntireRoad,
                 calculatenormals = false,
-                allowfullmaterialoptions = false,
                 shader = "VertexColorUnlitTintedAlpha2",
-                shadercolors = {
-                    _Color = "highway"
-                },
                 layer = 13
             }
 
+            --Left rail reflection light
             CreateRail {
-                --left side cliff
                 positionOffset = {
-                    x = 0,
+                    x = -trackWidth - .2,
                     y = 0
                 },
                 crossSectionShape = {
-                    {x = -trackWidth - 43, y = -80},
-                    {x = -trackWidth - 43, y = -29}
+                    {x = -.64, y = 0},
+                    {x = 0.30, y = 0},
+                    {x = 0.30, y = -0.56},
+                    {x = -.64, y = -0.56}
                 },
                 perShapeNodeColorScalers = {
-                    1,
-                    1
+                    .9,
+                    .9
                 },
                 colorMode = "static",
                 color = {r = 255, g = 255, b = 255},
                 flatten = false,
+                renderqueue = 2000,
                 wrapnodeshape = false,
-                texture = "textures/rail/cliff side2.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
+                texture = "textures/rail/left rail light.png",
+                textureMode = "repeataroundreverse",
+                fullfuture = showEntireRoad,
                 calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                shadercolors = {
-                    _Color = "highway"
-                },
-                layer = 13
-            }
-
-            CreateRail {
-                --right side cliff
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = trackWidth + 44, y = -29},
-                    {x = trackWidth + 44, y = -80}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1
-                },
-                colorMode = "static",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/cliff side.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                shadercolors = {
-                    _Color = "highway"
-                },
-                layer = 13
-            }
-
-            CreateRail {
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = -trackWidth - 14, y = -11},
-                    {x = -trackWidth - 0, y = -11}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1
-                },
-                colorMode = "static",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/cliff side.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                shadercolors = {
-                    _Color = "highway"
-                },
-                layer = 13
-            }
-
-            CreateRail {
-                positionOffset = {
-                    x = 0,
-                    y = 0
-                },
-                crossSectionShape = {
-                    {x = trackWidth + 0, y = -11},
-                    {x = trackWidth + 14, y = -11}
-                },
-                perShapeNodeColorScalers = {
-                    1,
-                    1
-                },
-                colorMode = "static",
-                color = {r = 255, g = 255, b = 255},
-                flatten = false,
-                wrapnodeshape = false,
-                texture = "textures/rail/cliff side2.png",
-                fullfuture = true,
-                stretch = math.ceil(#track * 2 / 63500),
-                calculatenormals = false,
-                allowfullmaterialoptions = false,
-                shader = "VertexColorUnlitTintedAlpha2",
-                shadercolors = {
-                    _Color = "highway"
-                },
+                shader = "VertexColorUnlitTintedAlpha",
                 layer = 13
             }
         end
 
-        CreateRail {
-            --Cliff outline, recommend any changes apply to all cliff outlines
-            positionOffset = {
-                x = -trackWidth - 43,
-                y = -29
-            },
-            crossSectionShape = {
-                {x = 0, y = -0.2},
-                {x = -.2, y = -0.2},
-                {x = -.2, y = 0},
-                {x = 0, y = 0}
-            },
-            colorMode = "static",
-            color = {r = 80, g = 80, b = 80},
-            flatten = false,
-            fullfuture = false,
-            shadowcaster = false,
-            shadowreceiver = true,
-            calculatenormals = false,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {55, 55, 55},
-            layer = 13
-        }
+        --Right
+        do
+            --Right rail light
+            CreateRail {
+                positionOffset = {
+                    x = trackWidth + .2,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = -.64, y = 0},
+                    {x = -.64, y = 0.5},
+                    {x = .33, y = 0.5},
+                    {x = .33, y = 0.5}
+                },
+                perShapeNodeColorScalers = {
+                    .9,
+                    .9
+                },
+                colorMode = "static",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                renderqueue = 2001,
+                wrapnodeshape = false,
+                texture = "textures/rail/right rail light.png",
+                textureMode = "repeataroundreverse",
+                fullfuture = showEntireRoad,
+                calculatenormals = false,
+                shader = "VertexColorUnlitTintedAlpha",
+                layer = 13
+            }
 
-        CreateRail {
-            --Cliff outline, recommend any changes apply to all cliff outlines
+            --Right rail outward light
+            CreateRail {
+                positionOffset = {
+                    x = trackWidth + .2,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = 0.32, y = 0.5},
+                    {x = 0.32, y = -0.55}
+                },
+                perShapeNodeColorScalers = {
+                    .9,
+                    .9
+                },
+                colorMode = "static",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                renderqueue = 2004,
+                wrapnodeshape = false,
+                texture = "textures/rail/right rail light.png",
+                fullfuture = showEntireRoad,
+                calculatenormals = false,
+                shader = "VertexColorUnlitTintedAlpha2",
+                layer = 13
+            }
+
+            --Right rail reflection light
+            CreateRail {
+                positionOffset = {
+                    x = trackWidth + .2,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = 0.30, y = -0.56},
+                    {x = -.64, y = -0.56},
+                    {x = -.64, y = 0},
+                    {x = 0.30, y = 0}
+                },
+                perShapeNodeColorScalers = {
+                    .9,
+                    .9
+                },
+                colorMode = "static",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                renderqueue = 2000,
+                wrapnodeshape = false,
+                texture = "textures/rail/right rail light.png",
+                textureMode = "repeataroundreverse",
+                fullfuture = showEntireRoad,
+                calculatenormals = false,
+                shader = "VertexColorUnlitTintedAlpha",
+                layer = 13
+            }
+
+        end
+
+    end
+end --End of rail rim lights
+
+----------------------
+-- Rail cliff
+----------------------
+
+--                 Left rail O______________O Right rail
+--							  (Road surface)
+
+--                  (Left cliff top)   (Right cliff top)
+--						  ---------------------
+--	      (Left cliff)	/						\ (Right cliff)
+--					/								\
+--				X (Cliff outline LT) (Cliff outline RT) X
+--			/												\
+--		   |												 |
+--		   | (Left side cliff)			   (Right side cliff)|
+--		   |												 |
+--		   X (Cliff outline LB)			  (Cliff outline RB) X
+--		   |												 |
+
+do --Rail cliff
+    if not wakeboard then
+        local outlineColor = {r = 101, g = 101, b = 101};
+
+        --Left
+        do
+            --Left cliff
+            CreateRail {
+                positionOffset = {
+                    x = 0,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = -trackWidth - 43, y = -29},
+                    {x = -trackWidth - 33, y = -20},
+                    {x = -trackWidth - 14, y = -11}
+                },
+                perShapeNodeColorScalers = {
+                    1,
+                    1,
+                    1,
+                    1
+                },
+                colorMode = oneColorCliff and "static" or "highway",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                wrapnodeshape = false,
+                texture = "textures/rail/big cliff.png",
+                fullfuture = true,
+                stretch = math.ceil(#track * 3 / 63500),
+                calculatenormals = false,
+                allowfullmaterialoptions = false,
+                shader = "VertexColorUnlitTintedAlpha2",
+                shadercolors = oneColorCliff and {_Color = "highway"} or nil,
+                layer = 13
+            }
+
+            --Left side cliff
+            CreateRail {
+                
+                positionOffset = {
+                    x = 0,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = -trackWidth - 43, y = -80},
+                    {x = -trackWidth - 43, y = -29}
+                },
+                perShapeNodeColorScalers = {
+                    1,
+                    1
+                },
+                colorMode = oneColorCliff and "static" or "highway",
+                --colorMode="static",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                wrapnodeshape = false,
+                texture = "textures/rail/cliff side2.png",
+                fullfuture = true,
+                stretch = math.ceil(#track * 2 / 63500),
+                calculatenormals = false,
+                allowfullmaterialoptions = false,
+                shader = "VertexColorUnlitTintedAlpha2",
+                shadercolors = oneColorCliff and {_Color = "highway"} or nil,
+                layer = 13
+            }
+
+            --Left cliff top
+            CreateRail {
+                positionOffset = {
+                    x = 0,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = -trackWidth - 14, y = -11},
+                    {x = -trackWidth - 0, y = -11}
+                },
+                perShapeNodeColorScalers = {
+                    1,
+                    1
+                },
+                colorMode = oneColorCliff and "static" or "highway",
+                --colorMode="static",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                wrapnodeshape = false,
+                texture = "textures/rail/cliff side.png",
+                fullfuture = true,
+                stretch = math.ceil(#track * 2 / 63500),
+                calculatenormals = false,
+                allowfullmaterialoptions = false,
+                shader = "VertexColorUnlitTintedAlpha2",
+                shadercolors = oneColorCliff and {_Color = "highway"} or nil,
+                layer = 13
+            }
+
+            --Cliff outline LB
+            CreateRail {
+                positionOffset = {
+                    x = -trackWidth - 43,
+                    y = -29
+                },
+                crossSectionShape = {
+                    {x = 0, y = -0.2},
+                    {x = -.2, y = -0.2},
+                    {x = -.2, y = 0},
+                    {x = 0, y = 0}
+                },
+                colorMode = "static",
+                color = outlineColor,
+                flatten = false,
+                fullfuture = false,
+                shadowcaster = false,
+                shadowreceiver = true,
+                calculatenormals = false,
+                shader = "DiffuseVertexColored2",
+                shadercolors = {55, 55, 55},
+                layer = 13
+            }
+
+            --Cliff outline LT
+            CreateRail {
+                positionOffset = {
+                    x = -trackWidth - 14,
+                    y = -11
+                },
+                crossSectionShape = {
+                    {x = 0, y = -0.2},
+                    {x = -.2, y = -0.2},
+                    {x = -.2, y = 0},
+                    {x = 0, y = 0}
+                },
+                colorMode = "static",
+                color = outlineColor,
+                flatten = false,
+                fullfuture = false,
+                shadowcaster = false,
+                shadowreceiver = true,
+                calculatenormals = false,
+                shader = "DiffuseVertexColored2",
+                shadercolors = {55, 55, 55},
+                layer = 13
+            }
+        end
+
+        --Right
+        do
+            --Right cliff
+            CreateRail {
+                positionOffset = {
+                    x = 0,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = trackWidth + 14, y = -11},
+                    {x = trackWidth + 33, y = -20},
+                    {x = trackWidth + 44.5, y = -29}
+                },
+                perShapeNodeColorScalers = {
+                    1,
+                    1,
+                    1,
+                    1
+                },
+                colorMode = oneColorCliff and "static" or "highway",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                behind_renderdist = 10,
+                wrapnodeshape = false,
+                texture = "textures/rail/big cliff.png",
+                fullfuture = true,
+                stretch = math.ceil(#track * 3 / 63500),
+                calculatenormals = false,
+                allowfullmaterialoptions = false,
+                shader = "VertexColorUnlitTintedAlpha2",
+                shadercolors = oneColorCliff and {_Color = "highway"} or nil,
+                layer = 13
+            }
+
+            --Right side cliff
+            CreateRail {
+                
+                positionOffset = {
+                    x = 0,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = trackWidth + 44, y = -29},
+                    {x = trackWidth + 44, y = -80}
+                },
+                perShapeNodeColorScalers = {
+                    1,
+                    1
+                },
+                colorMode = oneColorCliff and "static" or "highway",
+                --colorMode="static",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                wrapnodeshape = false,
+                texture = "textures/rail/cliff side.png",
+                fullfuture = true,
+                stretch = math.ceil(#track * 2 / 63500),
+                calculatenormals = false,
+                allowfullmaterialoptions = false,
+                shader = "VertexColorUnlitTintedAlpha2",
+                shadercolors = oneColorCliff and {_Color = "highway"} or nil,
+                layer = 13
+            }
+
+            --Right cliff top
+            CreateRail {
+                positionOffset = {
+                    x = 0,
+                    y = 0
+                },
+                crossSectionShape = {
+                    {x = trackWidth + 0, y = -11},
+                    {x = trackWidth + 14, y = -11}
+                },
+                perShapeNodeColorScalers = {
+                    1,
+                    1
+                },
+                colorMode = oneColorCliff and "static" or "highway",
+                color = {r = 255, g = 255, b = 255},
+                flatten = false,
+                wrapnodeshape = false,
+                texture = "textures/rail/cliff side2.png",
+                fullfuture = true,
+                stretch = math.ceil(#track * 2 / 63500),
+                calculatenormals = false,
+                allowfullmaterialoptions = false,
+                shader = "VertexColorUnlitTintedAlpha2",
+                shadercolors = oneColorCliff and {_Color = "highway"} or nil,
+                layer = 13
+            }
+
+            -- Cliff outline RB
+            CreateRail {
             positionOffset = {
                 x = trackWidth + 44.5,
                 y = -29
@@ -2279,7 +2417,7 @@ do --Rails
                 {x = 0, y = 0}
             },
             colorMode = "static",
-            color = {r = 80, g = 80, b = 80},
+            color = outlineColor,
             flatten = false,
             fullfuture = false,
             shadowcaster = false,
@@ -2290,32 +2428,8 @@ do --Rails
             layer = 13
         }
 
+        --Cliff outline RT
         CreateRail {
-            --Cliff outline, recommend any changes apply to all cliff outlines
-            positionOffset = {
-                x = -trackWidth - 14,
-                y = -11
-            },
-            crossSectionShape = {
-                {x = 0, y = -0.2},
-                {x = -.2, y = -0.2},
-                {x = -.2, y = 0},
-                {x = 0, y = 0}
-            },
-            colorMode = "static",
-            color = {r = 80, g = 80, b = 80},
-            flatten = false,
-            fullfuture = false,
-            shadowcaster = false,
-            shadowreceiver = true,
-            calculatenormals = false,
-            shader = "DiffuseVertexColored2",
-            shadercolors = {55, 55, 55},
-            layer = 13
-        }
-
-        CreateRail {
-            --Cliff outline, recommend any changes apply to all cliff outlines
             positionOffset = {
                 x = trackWidth + 14,
                 y = -11
@@ -2327,7 +2441,7 @@ do --Rails
                 {x = 0, y = 0}
             },
             colorMode = "static",
-            color = {r = 80, g = 80, b = 80},
+            color = outlineColor,
             flatten = false,
             fullfuture = false,
             shadowcaster = false,
@@ -2337,188 +2451,129 @@ do --Rails
             shadercolors = {55, 55, 55},
             layer = 13
         }
+        end
     end
+end
 
+----------------------
+-- Rail cliff (wakeboard)
+----------------------
+
+--					      O
+--			       ......-|- ......
+--			^......	      /\	   .....^
+--			   ~~~~~~~~~~~~~~~~~~~~~~~~
+--          /                          \
+--         /                            \ 
+--       */                              \*
+--       /                                \
+--
+--  '*' Denotes cliff outlines
+-- '/' and '\' denotes cliff (one giant rail, so no left and right differenciation)
+
+do --Wakeboard cliff
     if wakeboard then
-		if not oneColorCliff then
-			CreateRail {
-				--Wakeboard wide cliff
-				positionOffset = {
-					x = 0,
-					y = 0
-				},
-				crossSectionShape = {
-					{x = trackWidth + 11, y = -4},
-					{x = trackWidth + 28, y = -13},
-					{x = trackWidth + 36.5, y = -18},
-					{x = -trackWidth - 36.5, y = -18},
-					{x = -trackWidth + 36.5 - 28, y = -13},
-					{x = -trackWidth + 36.5 - 11, y = -4}
-				},
-				perShapeNodeColorScalers = {
-					1,
-					1,
-					1,
-					1
-				},
-				colorMode = "highway",
-				color = {r = 255, g = 255, b = 255},
-				flatten = false,
-				wrapnodeshape = true,
-				texture = "textures/rail/big cliff.png",
-				fullfuture = true,
-				stretch = math.ceil(#track * 6 / 63500),
-				calculatenormals = false,
-				allowfullmaterialoptions = false,
-				shader = "VertexColorUnlitTintedAlpha2",
-				layer = 13
-			}
-
-			CreateRail {
-				--Cliff outline, recommend any changes apply to all cliff outlines
-				positionOffset = {
-					x = -trackWidth - 36.5,
-					y = -17.5
-				},
-				crossSectionShape = {
-					{x = 0, y = 0.2},
-					{x = .4, y = 0.2},
-					{x = .4, y = 0},
-					{x = 0, y = 0}
-				},
-				colorMode = "static",
-				color = {r = 255, g = 255, b = 255},
-				flatten = false,
-				fullfuture = false,
-				shadowcaster = false,
-				shadowreceiver = true,
-				calculatenormals = false,
-				shader = "Diffuse",
-				shadercolors = {0, 0, 0},
-				layer = 13
-			}
-
-			CreateRail {
-				--Cliff outline, recommend any changes apply to all cliff outlines
-				positionOffset = {
-					x = trackWidth + 36.5,
-					y = -17.5
-				},
-				crossSectionShape = {
-					{x = 0, y = -0.2},
-					{x = -.4, y = -0.2},
-					{x = -.4, y = 0},
-					{x = 0, y = 0}
-				},
-				colorMode = "static",
-				color = {r = 255, g = 255, b = 255},
-				flatten = false,
-				fullfuture = false,
-				shadowcaster = false,
-				shadowreceiver = true,
-				calculatenormals = false,
-				shader = "Diffuse",
-				shadercolors = {0, 0, 0},
-				layer = 13
-			}
-		else
-			CreateRail {
-				--Wakeboard wide cliff
-				positionOffset = {
-					x = 0,
-					y = 0
-				},
-				crossSectionShape = {
-					{x = trackWidth + 11, y = -4},
-					{x = trackWidth + 28, y = -13},
-					{x = trackWidth + 36.5, y = -18},
-					{x = -trackWidth - 36.5, y = -18},
-					{x = -trackWidth + 36.5 - 28, y = -13},
-					{x = -trackWidth + 36.5 - 11, y = -4}
-				},
-				perShapeNodeColorScalers = {
-					1,
-					1,
-					1,
-					1
-				},
-				colorMode = "static",
-				color = {r = 255, g = 255, b = 255},
-				flatten = false,
-				wrapnodeshape = true,
-				texture = "textures/rail/big cliff.png",
-				fullfuture = true,
-				stretch = math.ceil(#track * 6 / 63500),
-				calculatenormals = false,
-				allowfullmaterialoptions = false,
-				shader = "VertexColorUnlitTintedAlpha2",
-				shadercolors={
-						_Color = "highway"
-				},
-				layer = 13
-			}
-
-			CreateRail {
-				--Cliff outline, recommend any changes apply to all cliff outlines
-				positionOffset = {
-					x = -trackWidth - 36.5,
-					y = -17.5
-				},
-				crossSectionShape = {
-					{x = 0, y = 0.2},
-					{x = .4, y = 0.2},
-					{x = .4, y = 0},
-					{x = 0, y = 0}
-				},
-				colorMode = "static",
-				color = {r = 255, g = 255, b = 255},
-				flatten = false,
-				fullfuture = false,
-				shadowcaster = false,
-				shadowreceiver = true,
-				calculatenormals = false,
-				shader = "Diffuse",
-				shadercolors = {0, 0, 0},
-				layer = 13
-			}
-	
-			CreateRail {
-				--Cliff outline, recommend any changes apply to all cliff outlines
-				positionOffset = {
-					x = trackWidth + 36.5,
-					y = -17.5
-				},
-				crossSectionShape = {
-					{x = 0, y = -0.2},
-					{x = -.4, y = -0.2},
-					{x = -.4, y = 0},
-					{x = 0, y = 0}
-				},
-				colorMode = "static",
-				color = {r = 255, g = 255, b = 255},
-				flatten = false,
-				fullfuture = false,
-				shadowcaster = false,
-				shadowreceiver = true,
-				calculatenormals = false,
-				shader = "Diffuse",
-				shadercolors = {0, 0, 0},
-				layer = 13
-			}
-		end
-    end
-
-    -- 		O (left skyline)    (right skyline) O
-    --
-    --
-    --					      O
-    --			       ......-|- ......
-    --			^......	      /\	   .....^
-    --			   ~~~~~~~~~~~~~~~~~~~~~~~~
-
-    if wakeboard then
+        --Cliff 
         CreateRail {
-            --left skyline
+            positionOffset = {
+                x = 0,
+                y = 0
+            },
+            crossSectionShape = {
+                {x = trackWidth + 11, y = -4},
+                {x = trackWidth + 28, y = -13},
+                {x = trackWidth + 36.5, y = -18},
+                {x = -trackWidth - 36.5, y = -18},
+                {x = -trackWidth + 36.5 - 28, y = -13},
+                {x = -trackWidth + 36.5 - 11, y = -4}
+            },
+            perShapeNodeColorScalers = {
+                1,
+                1,
+                1,
+                1
+            },
+            colorMode = oneColorCliff and "static" or "highway",
+            color = {r = 255, g = 255, b = 255},
+            flatten = false,
+            wrapnodeshape = true,
+            texture = "textures/rail/big cliff.png",
+            fullfuture = true,
+            stretch = math.ceil(#track * 6 / 63500),
+            calculatenormals = false,
+            allowfullmaterialoptions = false,
+            shader = "VertexColorUnlitTintedAlpha2",
+            shadercolors = oneColorCliff and {_Color = "highway"} or nil,
+            layer = 13
+        }
+
+        --Left cliff outline
+        CreateRail {
+            positionOffset = {
+                x = -trackWidth - 36.5,
+                y = -17.5
+            },
+            crossSectionShape = {
+                {x = 0, y = 0.2},
+                {x = .4, y = 0.2},
+                {x = .4, y = 0},
+                {x = 0, y = 0}
+            },
+            colorMode = "static",
+            color = {r = 255, g = 255, b = 255},
+            flatten = false,
+            fullfuture = false,
+            shadowcaster = false,
+            shadowreceiver = true,
+            calculatenormals = false,
+            shader = "Diffuse",
+            shadercolors = {0, 0, 0},
+            layer = 13
+        }
+
+        --Right cliff outline
+        CreateRail {
+            positionOffset = {
+                x = trackWidth + 36.5,
+                y = -17.5
+            },
+            crossSectionShape = {
+                {x = 0, y = -0.2},
+                {x = -.4, y = -0.2},
+                {x = -.4, y = 0},
+                {x = 0, y = 0}
+            },
+            colorMode = "static",
+            color = {r = 255, g = 255, b = 255},
+            flatten = false,
+            fullfuture = false,
+            shadowcaster = false,
+            shadowreceiver = true,
+            calculatenormals = false,
+            shader = "Diffuse",
+            shadercolors = {0, 0, 0},
+            layer = 13
+        }
+		
+    end
+end --End of wakeboard cliff
+
+----------------------
+-- Skyline (wakeboard)
+----------------------
+
+-- 		O (left skyline)    (right skyline) O
+--
+--
+--					      O
+--			       ......-|- ......
+--			^......	      /\	   .....^
+--			   ~~~~~~~~~~~~~~~~~~~~~~~~
+
+do --Wakeboard skyline
+    if wakeboard then
+        --left skyline
+        CreateRail {
             positionOffset = {
                 x = -18,
                 y = 33
@@ -2542,8 +2597,8 @@ do --Rails
             shader = "VertexColorUnlitTintedAlpha2"
         }
 
+        --right skyline
         CreateRail {
-            --right skyline
             positionOffset = {
                 x = 18,
                 y = 33
@@ -2568,4 +2623,4 @@ do --Rails
         }
 
     end
-end --End of rail creation
+end --End of skyline
