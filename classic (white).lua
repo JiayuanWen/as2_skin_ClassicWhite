@@ -2,11 +2,14 @@
 CLassic (White)
 
 Coded, modeled, and textured by:
-* Jiayuan "Weldon" Wen (Website: https://jiayuanwen.github.io, GitHub: https://github.com/JiayuanWen)
+* Jiayuan "Weldon" Wen (Website: https://jiayuanwen.github.io)
 
 I take no credit for the overall style, they go to the following parties:
 * Dylan Fitterer (Twitter: https://twitter.com/dylanfitterer)
 * Girgan Delic (Website: https://www.gorandelic.com/)
+
+Player ship is created and provided by:
+Paladin Studios (Website: https://paladinstudios.com/)
 
 Shader information & bug fixes
 * DeathByNukes (Socials: https://steamcommunity.com/id/DeathByNukes, Email: dbn@deathbynukes.com)
