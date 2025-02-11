@@ -17,7 +17,7 @@ License: GNU GPLv3, see LICENSE file for details.
 
 --Options
 competitiveCamera = false --Set this to true to tweak camera angle for competitive play.
-oneColorCliff = false --If this is set to true, the track's cliff will be the same color from begin to end. If set to false, the track's cliff will be in rainbow color. 
+oneColorCliff = false --If this is set to true, the track's cliff will be the same color from begin to end. If set to false, the track's cliff will be in rainbow color.
 showEntireRoad = false --If set to true, the entire track is visible. If set to false, the track is loaded section by section during gameplay.
 --End of options
 
@@ -80,7 +80,7 @@ do --Frequent used variables setup
     fullsteep = wakeboard or skinvars.prefersteep or (not ispuzzle)
     track = GetTrack() --get the track data from the game engine
     song = GetSongCompletionPercentage()
-	
+
 end --End of frequent used variables section
 
 
@@ -460,7 +460,7 @@ do -- Gameplay graphics
     -- Grid settings
     -- (the puzzle grids under the player ship)
     do
-        
+
         -- Define texture quality base on graphic setting
         local tileTexLevel
         if quality < 2 then
@@ -669,7 +669,7 @@ do --Player ship
                     texture = "textures/wakeboard/FullLeftArm_1024_wAO.png"
                 },
                 board = {
-                    shader = ifhifi("RimLightHatchedSurferExternal", "VertexColorUnlitTintedAlpha"), 
+                    shader = ifhifi("RimLightHatchedSurferExternal", "VertexColorUnlitTintedAlpha"),
                     renderqueue = 3999,
                     shadercolors = {
                         _Color = {{161, 161, 161}, scaletype = "intensity", minscaler = 5, maxscaler = 5},
@@ -681,7 +681,7 @@ do --Player ship
                     texture = "textures/wakeboard/board_internalOutline.png"
                 },
                 body = {
-                    shader = "RimLightHatchedSurfer", 
+                    shader = "RimLightHatchedSurfer",
                     renderqueue = 3000,
                     shadercolors = {
                         _Color = {255, 255, 255},
@@ -771,9 +771,9 @@ do --Skybox
             texture = "textures/scene/White.png"
         }
 
-        --Skywire blinks with the music's intensity 
+        --Skywire blinks with the music's intensity
         --[[
-        function Update(dt, trackLocation, playerStrafe, playerJumpHeight, intensity) 
+        function Update(dt, trackLocation, playerStrafe, playerJumpHeight, intensity)
             if skywireMat then
                 local greyScale = 255 - (92*intensity)
                 UpdateShaderSettings{
@@ -948,7 +948,7 @@ do --Air Bubbles
         end
 
         -- Air bubble scattering
-        do 
+        do
             -- Bubble placements
             if bubbleNodes == nil and bubbleNodesTop == nil then
                 local bubbleNodes = {}
@@ -961,41 +961,41 @@ do --Air Bubbles
                     if i % 4 == 0 and track[i].funkyrot == false then
                         bubbleNodes[#bubbleNodes + 1] = i
 
-                        local xOffset = trackWidth + math.random(10, 100) -- Add track width so it doesn't appear on or near the track 
-                        local yOffset = math.random(-50, 50) 
+                        local xOffset = trackWidth + math.random(10, 100) -- Add track width so it doesn't appear on or near the track
+                        local yOffset = math.random(-50, 50)
 
                         --Randomize rather the bubble appear left or right of the track
                         if math.random(0, 1) > 0.4 then
                             xOffset = xOffset * -1
-                        end 
+                        end
 
-                        offsets[#offsets + 1] = {xOffset,yOffset, 0} 
+                        offsets[#offsets + 1] = {xOffset,yOffset, 0}
                     end
 
                     -- This portion scatters bubbles ON TOP of the track
                     if i % 15 == 0 and track[i].funkyrot == false then
                         bubbleNodesTop[#bubbleNodesTop + 1] = i
 
-                        local xOffsetTop = trackWidth + math.random(-20, 20) 
-                        local yOffsetTop = trackWidth + math.random(10, 50) 
+                        local xOffsetTop = trackWidth + math.random(-20, 20)
+                        local yOffsetTop = trackWidth + math.random(10, 50)
 
-                        offsetsTop[#offsetsTop + 1] = {xOffsetTop,yOffsetTop, 0} 
+                        offsetsTop[#offsetsTop + 1] = {xOffsetTop,yOffsetTop, 0}
                     end
                 end
 
                 --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
                 BatchRenderEveryFrame {
-                    prefabName = "AirBubbles", 
+                    prefabName = "AirBubbles",
                     locations = bubbleNodes, -- Render bubbles beisdes the track
                     rotateWithTrack = true,
                     maxShown = bubbleDensity,
                     maxDistanceShown = 800,
                     offsets = offsets,
                     collisionLayer = -7, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = false 
+                    testAndHideIfCollideWithTrack = false
                 }
                 BatchRenderEveryFrame {
-                    prefabName = "AirBubbles", 
+                    prefabName = "AirBubbles",
                     locations = bubbleNodesTop, -- Render bubbles on top of the track
                     rotateWithTrack = true,
                     maxShown = bubbleDensity,
@@ -1003,7 +1003,7 @@ do --Air Bubbles
                     offsets = offsetsTop,
                     collisionLayer = -7,
                         --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                    testAndHideIfCollideWithTrack = false 
+                    testAndHideIfCollideWithTrack = false
                 }
             end
         end
@@ -1039,12 +1039,12 @@ end --End of waves section
 
 --------------------------------------------------------------------------------
 
--- Background objects 
+-- Background objects
 
 --------------------------------------------------------------------------------
 do --Background objects
     if showBackgroundBuilding then
-        if quality >= 3 then -- Only show objects on 'high' graphic setting 
+        if quality >= 3 then -- Only show objects on 'high' graphic setting
 
             --Disks
             do
@@ -1066,7 +1066,7 @@ do --Background objects
                             shadercolors = {
                                 _Color = "highway"
                             },
-                            transform = {scale = {scaletype = "intensity", min = {20, 90, 20}, max = {90, 90, 90}}},
+                            transform = {scale = {scaletype = "intensity", min = {30, 135, 30}, max = {135, 135, 135}}},
                             texture = "textures/rail/cliff side.png",
                             layer = 19
                         }
@@ -1089,9 +1089,10 @@ do --Background objects
                             mesh = buildingMesh_1,
                             shader = "VertexColorUnlitTintedAlpha2",
                             shadercolors = {
-                                _Color = "highway"
+                                --_Color = "highway"
+                                _Color = { r=101, g=101, b=101 }
                             },
-                            transform = {scale = {45, 90, 45}},
+                            transform = {scale = {68, 68, 68}},
                             texture = "textures/rail/cliff side.png",
                             layer = 19
                         }
@@ -1110,12 +1111,12 @@ do --Background objects
                             buildingRotatAnimation[#buildingRotatAnimation + 1] = {0, 0, 0}
 
                             --Offset from origin
-                            local xOffset = math.random(55, 80)
+                            local xOffset = math.random(450, 600)
                             local yOffset = math.random(0, 1)
                             local zOffset = math.random(-1, 0)
-                            if xOffset < 300 then
-                                xOffset = 670
-                            end
+                            -- if xOffset < 300 then
+                            --     xOffset = 670
+                            -- end
 
                             --Randomize rather the building appear left or right of the track
                             if math.random() > 0.4 then
@@ -1129,12 +1130,12 @@ do --Background objects
 
                     --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
                     BatchRenderEveryFrame {
-                        prefabName = "Disks", 
+                        prefabName = "Disks",
                         locations = buildingNodes,
                         rotateWithTrack = false,
                         rotationspeeds = buildingRotatAnimation,
-                        maxShown = 6,
-                        maxDistanceShown = 2000,
+                        maxShown = 8,
+                        maxDistanceShown = 600,
                         offsets = offsets,
                         collisionLayer = -4, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
                         testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
@@ -1142,12 +1143,12 @@ do --Background objects
 
                     --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
                     BatchRenderEveryFrame {
-                        prefabName = "DisksPole", 
+                        prefabName = "DisksPole",
                         locations = buildingNodes,
                         rotateWithTrack = false,
                         rotationspeeds = buildingRotatAnimation,
-                        maxShown = 6,
-                        maxDistanceShown = 2000,
+                        maxShown = 8,
+                        maxDistanceShown = 600,
                         offsets = offsets,
                         collisionLayer = -4, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
                         testAndHideIfCollideWithTrack = true --if true, it checks each render location against a ray down the center of the track for collision. Any hits are not rendered
@@ -1156,7 +1157,7 @@ do --Background objects
             end
 
             --That dart like thingy I don't know what to call it
-            do 
+            do
                 --Adjust texture quality base on graphic setting
                 if quality < 4 then
                     clingTexture = "textures/backgroundBuildings/flydart/ClingderShader_High.png"
@@ -1201,21 +1202,21 @@ do --Background objects
                             buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 370, 0}
 
                             --Offset from origin
-                            local xOffset = 80 
+                            local xOffset = 80
 
                             --Randomize rather the building appear left or right of the track
                             if math.random(0, 1) > 0.4 then
                                 xOffset = xOffset * -1
-                            end 
+                            end
 
                             --Building offset on {x,y,z}
-                            offsets[#offsets + 1] = {xOffset, 2, 0} 
+                            offsets[#offsets + 1] = {xOffset, 2, 0}
                         end
                     end
 
                     --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
                     BatchRenderEveryFrame {
-                        prefabName = "FlyingThing", 
+                        prefabName = "FlyingThing",
                         locations = buildingNodes3,
                         rotateWithTrack = true,
                         rotationspeeds = buildingRotateAnimation,
@@ -1223,7 +1224,7 @@ do --Background objects
                         maxDistanceShown = 2000,
                         offsets = offsets,
                         collisionLayer = -7, --will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                        testAndHideIfCollideWithTrack = false 
+                        testAndHideIfCollideWithTrack = false
                     }
                 end
             end
@@ -1273,28 +1274,28 @@ do --Background objects
                             buildingNodes5[#buildingNodes5 + 1] = i
 
                             --Offset from origin
-                            local xOffset = 356 
+                            local xOffset = 356
 
                             --Randomize rather the building appear left or right of the track
                             if math.random(0, 1) > 0.5 then
                                 xOffset = xOffset * -1
-                            end 
+                            end
 
                             --Building offset on {x,y,z}
-                            offsets[#offsets + 1] = {xOffset, 50, 0} 
+                            offsets[#offsets + 1] = {xOffset, 50, 0}
                         end
                     end
 
                     --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
                     BatchRenderEveryFrame {
-                        prefabName = "Discoball", 
+                        prefabName = "Discoball",
                         locations = buildingNodes5,
                         rotateWithTrack = true,
                         maxShown = 5,
                         maxDistanceShown = 2000,
                         offsets = offsets,
                         collisionLayer = -2, --Will collision test with other batch-rendered objects on the same layer. set less than 0 for no other-object collision testing
-                        testAndHideIfCollideWithTrack = true 
+                        testAndHideIfCollideWithTrack = true
                     }
                 end
             end
@@ -1346,21 +1347,21 @@ do --Background objects
                             buildingRotateAnimation[#buildingRotateAnimation + 1] = {0, 200, 0}
 
                             --Offset from origin
-                            local xOffset = 330 
+                            local xOffset = 330
 
                             --Randomize rather the building appear left or right of the track
                             if math.random(0, 1) > 0.5 then
                                 xOffset = xOffset * -1
-                            end 
+                            end
 
                             --Building offset on {x,y,z}
-                            offsets[#offsets + 1] = {xOffset, 0, 0} 
+                            offsets[#offsets + 1] = {xOffset, 0, 0}
                         end
                     end
 
                     --Tell the game to render the model (prefab) in a batch (with Graphics.DrawMesh) every frame
                     BatchRenderEveryFrame {
-                        prefabName = "BlockDance", 
+                        prefabName = "BlockDance",
                         locations = buildingNodes6,
                         rotateWithTrack = true,
                         rotationspeeds = buildingRotateAnimation,
@@ -1368,8 +1369,8 @@ do --Background objects
                         maxDistanceShown = 2000,
                         offsets = offsets,
                         collisionLayer = -3,
-                        
-                        testAndHideIfCollideWithTrack = false 
+
+                        testAndHideIfCollideWithTrack = false
                     }
                 end
             end
@@ -1385,7 +1386,7 @@ end --End of background objects
 -- End of track object (Also known as endcookie)
 
 --------------------------------------------------------------------------------
-do --End of track object 
+do --End of track object
 
     -- Adjust texture quality base on graphic setting
     if quality < 2 then
@@ -1487,7 +1488,7 @@ do --End of track object
                 buildingRotatAnimation[#buildingRotatAnimation + 1] = {0, 0, 11}
                 buildingRotatAnimation2[#buildingRotatAnimation2 + 1] = {0, 0, -11}
                 endCookieNode[#endCookieNode + 1] = #track
-                
+
                 offsets[#offsets + 1] = {0, 0, 0}
                 break
             end
@@ -1495,18 +1496,18 @@ do --End of track object
 
         -- Renders the objects
         BatchRenderEveryFrame {
-            prefabName = "EndCookie_TentInner", 
+            prefabName = "EndCookie_TentInner",
             locations = endCookieNode, -- Place only one at the end of track, same logic goes to all renders below
             rotateWithTrack = true,
             rotationspeeds = buildingRotatAnimation,
             maxShown = 1,
             maxDistanceShown = 100000,
             offsets = offsets,
-            collisionLayer = -1, 
-            testAndHideIfCollideWithTrack = false 
+            collisionLayer = -1,
+            testAndHideIfCollideWithTrack = false
         }
         BatchRenderEveryFrame {
-            prefabName = "EndCookie_TentOuter", 
+            prefabName = "EndCookie_TentOuter",
             locations = endCookieNode,
             rotateWithTrack = true,
             rotationspeeds = buildingRotatAnimation,
@@ -1517,7 +1518,7 @@ do --End of track object
             testAndHideIfCollideWithTrack = false
         }
         BatchRenderEveryFrame {
-            prefabName = "EndCookie_portal", 
+            prefabName = "EndCookie_portal",
             locations = endCookieNode,
             rotateWithTrack = true,
             rotationspeeds = buildingRotatAnimation2,
@@ -1525,7 +1526,7 @@ do --End of track object
             maxDistanceShown = 100000,
             offsets = offsets,
             collisionLayer = -1,
-            testAndHideIfCollideWithTrack = false 
+            testAndHideIfCollideWithTrack = false
         }
     end
 end --End of end object
@@ -1725,7 +1726,7 @@ do --Rail outlines
 
         --Left rail upperright outline
         CreateRail {
-            
+
             positionOffset = {
                 x = -trackWidth - 0.84,
                 y = 0.5
@@ -1759,7 +1760,7 @@ do --Rail outlines
     if not wakeboard then
         --Right rail upperleft outline
         CreateRail {
-            
+
             positionOffset = {
                 x = trackWidth - 0.46,
                 y = 0.5
@@ -1790,7 +1791,7 @@ do --Rail outlines
 
         --Right rail upperright outline
         CreateRail {
-            
+
             positionOffset = {
                 x = trackWidth + 0.51,
                 y = 0.5
@@ -1821,7 +1822,7 @@ do --Rail outlines
 
         --Right rail bottomleft outline
         CreateRail {
-            
+
             positionOffset = {
                 x = trackWidth - 0.445,
                 y = 0
@@ -1956,8 +1957,8 @@ end --End of shoulder lanes
 -- Rail rim lights
 ----------------------
 
---            <------------ Left rail ouward light                            Right rail ouward light  ------------>    
---      ---------------------                                                                         --------------------- 
+--            <------------ Left rail ouward light                            Right rail ouward light  ------------>
+--      ---------------------                                                                         ---------------------
 --      |                   | |                 													| |                   |
 --      |                   | | Left rail light                 				   Right rail light | |                   |
 --      |                   | V                                                                     V |                   |
@@ -2206,7 +2207,7 @@ do --Rail cliff
 
             --Left side cliff
             CreateRail {
-                
+
                 positionOffset = {
                     x = 0,
                     y = 0
@@ -2348,7 +2349,7 @@ do --Rail cliff
 
             --Right side cliff
             CreateRail {
-                
+
                 positionOffset = {
                     x = 0,
                     y = 0
@@ -2464,7 +2465,7 @@ end
 --			^......	      /\	   .....^
 --			   ~~~~~~~~~~~~~~~~~~~~~~~~
 --          /                          \
---         /                            \ 
+--         /                            \
 --       */                              \*
 --       /                                \
 --
@@ -2473,7 +2474,7 @@ end
 
 do --Wakeboard cliff
     if wakeboard then
-        --Cliff 
+        --Cliff
         CreateRail {
             positionOffset = {
                 x = 0,
@@ -2554,7 +2555,7 @@ do --Wakeboard cliff
             shadercolors = {0, 0, 0},
             layer = 13
         }
-		
+
     end
 end --End of wakeboard cliff
 
