@@ -5,7 +5,7 @@
 A custom skin for the rhythm game [Audiosurf 2](https://store.steampowered.com/app/235800/Audiosurf_2/). This skin aim to recreate the white background look from [Audiosurf 1](https://store.steampowered.com/app/12900/AudioSurf/).
 
 ![GitHub tag (with filter)](https://img.shields.io/github/v/tag/JiayuanWen/as2_skin_ClassicWhite?label=version&style=flat-square&labelColor=747474&color=8900ff)
-![Static Badge](https://img.shields.io/badge/Steam_Workshop-1?style=flat-square&label=Avaliable&labelColor=747474&color=8900ff)
+[![Static Badge](https://img.shields.io/badge/Steam_Workshop-1?style=flat-square&label=Avaliable&labelColor=747474&color=8900ff)](https://steamcommunity.com/sharedfiles/filedetails/?id=1157230034)
 
 <br>
 
